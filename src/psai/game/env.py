@@ -20,5 +20,16 @@ class PhotosynthesisEnv(gym.Env):
         info = {}
         return self.state, reward, done, truncated, info
 
+    def calculate_cost(self, action) -> int:
+        """
+        Gets the cost of an action in light points. Note, the cost of buying a tree
+        depends on the number already bought.   
+
+        Parameters
+        ----------
+        action
+        """
+        ...
+
     def render(self, mode="human"):
         print("Rendering not implemented.")
