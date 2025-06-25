@@ -1,5 +1,5 @@
 import numpy as np
-from psai.game.translations import encode_human_to_vector, decode_vector_to_human
+from psai.game.translations import encode_human_to_vector_board, decode_vector_to_human_board
 
 def sample_game_state():
     board_state = {
@@ -36,9 +36,8 @@ def sample_game_state():
 
 def test_encode_decode_roundtrip():
     board_state, sun_pos, player_stats, active_player = sample_game_state()
-    vector = encode_human_to_vector(board_state, sun_pos, player_stats, active_player)
-    decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player = decode_vector_to_human(vector)
-
+    vector = encode_human_to_vector_board(board_state, sun_pos, player_stats, active_player)
+    decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player = decode_vector_to_human_board(vector)
     for k, v in board_state.items():
         assert len(decoded_board_state[k]) == len(v)
         for i, (owner, tree_size, is_seed) in enumerate(v):
@@ -52,7 +51,7 @@ def test_encode_decode_roundtrip():
 
 def test_encode_decode_encode():
     board_state, sun_pos, player_stats, active_player = sample_game_state()
-    vector_1 = encode_human_to_vector(board_state, sun_pos, player_stats, active_player)
-    decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player = decode_vector_to_human(vector_1)
-    vector_2 = encode_human_to_vector(decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player)
+    vector_1 = encode_human_to_vector_board(board_state, sun_pos, player_stats, active_player)
+    decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player = decode_vector_to_human_board(vector_1)
+    vector_2 = encode_human_to_vector_board(decoded_board_state, decoded_sun_pos, decoded_player_stats, decoded_active_player)
     assert np.array_equal(vector_1, vector_2), "Vectors do not match after encode-decode-encode roundtrip."

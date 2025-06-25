@@ -1,1 +1,0 @@
-from psai.game.translations import encode_human_to_vector, decode_vector_to_human
