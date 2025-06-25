@@ -16,3 +16,7 @@ Run with
 
 `cd PhotosynthesisAI`
 `poetry run python src/psai/file.py`
+
+To find the env in VSCode, go to the repo in terminal, run
+`poetry env info --path`
+Then from the palatte choose `Select Python Interpretter` and add that path.

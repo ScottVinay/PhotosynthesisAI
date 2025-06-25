@@ -1,3 +1,8 @@
 {
-  "python.defaultInterpreterPath": "/Users/scott/Library/Caches/pypoetry/virtualenvs/photosynthesisai-4EHKyMdB-py3.13"
+  "python.defaultInterpreterPath": "/Users/scott/Library/Caches/pypoetry/virtualenvs/photosynthesisai-4EHKyMdB-py3.13",
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

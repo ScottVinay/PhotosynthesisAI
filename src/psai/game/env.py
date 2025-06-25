@@ -14,10 +14,12 @@ class PhotosynthesisEnv(gym.Env):
 
     def step(self, action):
         # Apply action logic here
+        # Note: planting a seed from a tree "uses" both the tree cell and the seed cell.
         reward = 0
         done = False
         truncated = False
         info = {}
+
         return self.state, reward, done, truncated, info
 
     def calculate_cost(self, action) -> int:
