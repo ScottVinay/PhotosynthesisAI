@@ -158,7 +158,6 @@ def create_rotation_index(board_moves_clockwise : bool) -> np.ndarray:
     ...
 
 
-
 def decode_vector_to_human_board(
         vector: np.ndarray
     ) -> tuple[
@@ -246,3 +245,46 @@ def decode_vector_to_human_board(
     return board_state, sun_pos, player_stats, active_player
 
 
+def encode_human_to_int_action(
+        action: dict,
+    ) -> int:
+    """
+    Convert a human-readable action into an integer representation.
+
+    Parameters
+    ----------
+    action : dict
+        A dictionary representing the action, typically with keys like "action_type", "target", etc.
+
+    Returns
+    -------
+    int
+        The index of the action in the action space.
+    """
+    
+    # This is a placeholder implementation.
+    # You would need to define how to convert the action dictionary to an integer.
+    
+    return 0  # Replace with actual logic to convert action to integer index.
+
+
+def decode_int_to_human_action(
+        action: int,
+    ) -> dict:
+    """
+    Convert a vector representation of an action back to a human-readable format.
+
+    Parameters
+    ----------
+    vector : np.ndarray
+        A 1D numpy array representing the action.
+    action_space_size : int
+        The size of the action space.
+
+    Returns
+    -------
+    int
+        The index of the action in the action space.
+    """
+    
+    return {}
