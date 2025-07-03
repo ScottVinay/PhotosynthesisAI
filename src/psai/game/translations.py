@@ -3,54 +3,13 @@ This is for translating human-readable game states into vectors and vice-versa.
 """
 
 import numpy as np
+from psai.game.env import State
 
 def encode_human_to_vector_board(
-        board_state : dict[str, list[tuple]],
-        sun_pos : int,
-        player_stats : dict[str, dict[str, int]],
-        active_player : int,
+        state : State,
     ):
     """
     Convert a human-readable game state into a vector representation.
-    
-    Parameters
-    ----------
-    board_state : dict
-        A dictionary representing the game board state, where keys are ring identifiers.
-        The values are lists of tuples of (owner, tree_size, used) for each cell in the ring.
-
-        - owner: str, the player who owns the cell (e.g., "p1", "p2", "empty").
-        - tree_size: str, the size of the tree in the cell (e.g., "seed", "small", "medium", "large", "empty").
-        - used: bool, indicates whether the cell has been used this turn.
-
-        Example:
-        {
-            "ring_1": [("p1", "seed", True), ("p2", "small", False), ("p1", "medium", False), ...,]
-            "ring_2": [("p4", "small", False), ("p2", "seed", True), ("empty", "empty", False), ...,]
-            ...,
-        }
-
-    sun_pos : int < 6
-        The position of the sun in the game, typically an integer representing the current sun's position.
-
-    player_stats : dict
-        A dictionary containing player statistics.
-        Keys are "p1", "p2", "p3", "p4" and values are dictionaries with keys:
-        - "light": int, the amount of light the player has
-        - "score": int, the player's score
-        - "seeds_stash": int, the number of seeds the player has in their stash.
-        - "seeds_ready": int, the number of seeds the player has ready to plant.
-        - "small_stash": int
-        - "small_ready": int
-        - "medium_stash": int
-        - "medium_ready": int
-        - "large_stash": int
-        - "large_ready": int
-
-        The price of the next tree will depend on the value of stash.
-
-    active_player : int < 4
-        The index of the active player (0, 1, 2, or 3).
         
     Returns
     -------
@@ -61,7 +20,6 @@ def encode_human_to_vector_board(
     # --------------- #
     #   Board state   #
     # --------------- #
-
     owner_onehot = np.zeros((37, 5))
     tree_size_onehot = np.zeros((37, 5))
     used_onehot = np.zeros(37,)
@@ -71,7 +29,7 @@ def encode_human_to_vector_board(
 
     i_cell = 0
     for i_ring in range(4):
-        ring_details = board_state[f"ring_{i_ring + 1}"]
+        ring_details = state.board_state[i_ring]
         for owner, size, used in ring_details:
             owner_onehot[i_cell, owner_map[owner]] = 1
             tree_size_onehot[i_cell, tree_size_map[size]] = 1
@@ -84,7 +42,7 @@ def encode_human_to_vector_board(
     # ---------------- #
         
     sun_position_onehot = np.zeros(6)
-    sun_position_onehot[sun_pos] = 1
+    sun_position_onehot[state.sun_pos] = 1
 
 
     # ---------------- #
@@ -94,8 +52,8 @@ def encode_human_to_vector_board(
     norms = {
         "light" : 10,
         "score" : 10,
-        "seeds_stash" : 4,
-        "seeds_ready" : 4,
+        "seed_stash" : 4,
+        "seed_ready" : 4,
         "small_stash" : 4,
         "small_ready" : 4,
         "medium_stash" : 4,
@@ -104,13 +62,13 @@ def encode_human_to_vector_board(
         "large_ready" : 4,
     }
 
-    assert set(norms.keys()) == set(player_stats["p1"].keys()), \
+    assert set(norms.keys()) == set(state.player_stats["p1"].keys()), \
         "Player stats keys do not match expected keys."
 
-    all_player_vectors = np.zeros((4, len(player_stats["p1"].keys())))
+    all_player_vectors = np.zeros((4, len(state.player_stats["p1"].keys())))
     for ip, player in enumerate(["p1", "p2", "p3", "p4"]):
         player_vector = np.array([
-            player_stats[player][name] / norms[name]
+            state.player_stats[player][name] / norms[name]
             for name in sorted(norms.keys())
         ], dtype=np.float32)
         all_player_vectors[ip, :] = player_vector
@@ -120,8 +78,16 @@ def encode_human_to_vector_board(
     # ----------------- #
 
     active_onehot = np.zeros(4)
-    active_onehot[active_player] = 1
-            
+    active_onehot[state.active_player] = 1
+    
+    
+    # -------- #
+    #   Turn   #
+    # -------- #
+
+    turn_onehot = np.zeros(5)
+    turn_onehot[state.turn] = 1
+        
 
     # ----------- #
     #   Combine   #
@@ -134,38 +100,13 @@ def encode_human_to_vector_board(
         sun_position_onehot.flatten(),
         all_player_vectors.flatten(),
         active_onehot.flatten(),
+        turn_onehot.flatten(),
     ])
 
     return vector
 
 
-
-def create_rotation_index(board_moves_clockwise : bool) -> np.ndarray:
-    """
-    Gets the vector that rotates the board state by 1/6.
-
-    Parameters
-    ----------
-    board_moves_clockwise : bool
-        If True, the board is rotated clockwise; if False, counter-clockwise.
-    
-    Returns
-    -------
-    np.ndarray
-        A 1D numpy array of shape equal to that of the board state vector.
-        board_vector[rotation_vector] will give the rotated board state.
-    """
-    ...
-
-
-def decode_vector_to_human_board(
-        vector: np.ndarray
-    ) -> tuple[
-        dict[str, list[tuple]],
-        int,
-        dict[str, dict[str, int]],
-        int
-    ]:
+def decode_vector_to_human_board(vector: np.ndarray) -> State:
     """
     Convert a vector representation of the game state back to a human-readable format.
 
@@ -183,16 +124,12 @@ def decode_vector_to_human_board(
     owner_map = {0: "empty", 1: "p1", 2: "p2", 3: "p3", 4: "p4"}
     tree_size_map = {0: "empty", 1: "seed", 2: "small", 3: "medium", 4: "large"}
     player_names = ["p1", "p2", "p3", "p4"]
-    stat_names = [
-        "light", "score", "seeds_stash", "seeds_ready",
-        "small_stash", "small_ready", "medium_stash", "medium_ready",
-        "large_stash", "large_ready"
-    ]
+    
     norms = {
         "light" : 10,
         "score" : 10,
-        "seeds_stash" : 4,
-        "seeds_ready" : 4,
+        "seed_stash" : 4,
+        "seed_ready" : 4,
         "small_stash" : 4,
         "small_ready" : 4,
         "medium_stash" : 4,
@@ -221,7 +158,7 @@ def decode_vector_to_human_board(
             used = bool(round(used_onehot[i_cell]))
             ring.append((owner_map[owner_idx], tree_size_map[size_idx], used))
             i_cell += 1
-        board_state[f"ring_{i_ring+1}"] = ring
+        board_state[i_ring] = ring
 
     # Sun position
     sun_position_onehot = vector[idx:idx+6]
@@ -240,9 +177,22 @@ def decode_vector_to_human_board(
 
     # Active player
     active_onehot = vector[idx:idx+4]
+    idx += 4
     active_player = int(np.argmax(active_onehot))
 
-    return board_state, sun_pos, player_stats, active_player
+    # Turn
+    turn_onehot = vector[idx:idx+5]
+    idx += 4
+    turn = int(np.argmax(turn_onehot))
+
+    state = State(
+        board_state=board_state,
+        sun_pos=sun_pos,
+        player_stats=player_stats,
+        active_player=active_player,
+        turn=turn,
+    )
+    return state
 
 
 def encode_human_to_int_action(
