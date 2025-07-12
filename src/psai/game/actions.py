@@ -223,6 +223,14 @@ def get_purchase_cost(
     ----------
     tree_size : str
         The size of the tree to be purchased, one of 'seed', 'small', 'medium', 'large'.
+    
     stash_size : int
         The number of trees of that size remaining in the player's stash.
     """
+    costs = {
+        'seed': [1e9, 2, 2, 1, 1],
+        'small': [1e9, 3, 3, 2, 2],
+        'medium': [1e9, 4, 3, 3],
+        'large': [1e9, 5, 4],
+    }
+    return costs[tree_size][stash_size]
