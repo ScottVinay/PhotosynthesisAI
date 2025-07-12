@@ -59,7 +59,7 @@ def get_allowed_actions(state : State) -> list[Action]:
     # --------- #
 
     player_stats = state.player_stats[state.active_player]
-    
+
     # Get all empty cells (no tree/seed)
     empty_cells = [cell for cell in state.board_state if cell.size is None]
     
@@ -71,6 +71,8 @@ def get_allowed_actions(state : State) -> list[Action]:
                 if (origin_cell.owner == state.active_player and 
                     origin_cell.size is not None and 
                     not origin_cell.used and
+                    not target_cell.used and
+                    light >= 1 and
                     can_spread_seed(origin_cell, target_cell)):
                     
                     act = Action(
@@ -91,7 +93,7 @@ def get_allowed_actions(state : State) -> list[Action]:
             cell.size is not None and 
             not cell.used):
             
-            if cell.size == 'seed' and player_stats.small_ready > 0:
+            if cell.size == 'seed' and player_stats.small_ready > 0 and light >= 1:
                 act = Action(
                     action_type='upgrade_tree',
                     size='small',
@@ -100,7 +102,7 @@ def get_allowed_actions(state : State) -> list[Action]:
                 )
                 allowed_actions.append(act)
                 
-            elif cell.size == 'small' and player_stats.medium_ready > 0:
+            elif cell.size == 'small' and player_stats.medium_ready > 0 and light >= 2:
                 act = Action(
                     action_type='upgrade_tree', 
                     size='medium',
@@ -109,7 +111,7 @@ def get_allowed_actions(state : State) -> list[Action]:
                 )
                 allowed_actions.append(act)
                 
-            elif cell.size == 'medium' and player_stats.large_ready > 0:
+            elif cell.size == 'medium' and player_stats.large_ready > 0 and light >= 3:
                 act = Action(
                     action_type='upgrade_tree',
                     size='large', 
@@ -125,7 +127,8 @@ def get_allowed_actions(state : State) -> list[Action]:
     # Large trees can be harvested for points
     for cell in state.board_state:
         if (cell.owner == state.active_player and 
-            cell.size == 'large' and 
+            cell.size == 'large' and
+            light >= 4 and
             not cell.used):
             
             act = Action(
@@ -168,6 +171,7 @@ def can_spread_seed(origin_cell, target_cell) -> bool:
     bool
         True if the seed can be spread, False otherwise.
     """
+    #TODO Check this function
     # Calculate distance between cells
     origin_ring, origin_theta = origin_cell.loc
     target_ring, target_theta = target_cell.loc
@@ -222,20 +226,3 @@ def get_purchase_cost(
     stash_size : int
         The number of trees of that size remaining in the player's stash.
     """
-    # Cost depends on how many are missing from the stash
-    max_stash = {
-        'seed': 4,
-        'small': 4, 
-        'medium': 3,
-        'large': 2
-    }
-    
-    base_cost = {
-        'seed': 0,
-        'small': 1,
-        'medium': 2, 
-        'large': 3
-    }
-    
-    trees_bought = max_stash[tree_size] - stash_size
-    return base_cost[tree_size] + trees_bought
