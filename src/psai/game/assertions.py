@@ -1,14 +1,15 @@
-def assertion_ring_cell(ring, cell):
+def assertion_loc(ring, theta):
     """
-    Asserts that the ring and cell indices are valid.
+    Asserts that the ring and theta indices are valid.
     """
-    assert ring >= 0 and ring <= 3
-    assert cell >= 0
+    error_string = f'Ring = {ring}, Theta = {theta}'
+    assert ring >= 0 and ring <= 3, error_string
+    assert theta >= 0, error_string
     if ring == 0:
-        assert cell < 18
+        assert theta < 18, error_string
     elif ring == 1:
-        assert cell < 12
+        assert theta < 12, error_string
     elif ring == 2:
-        assert cell < 6
+        assert theta < 6, error_string
     elif ring == 3:
-        assert cell < 1
+        assert theta < 1, error_string

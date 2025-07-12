@@ -3,7 +3,9 @@ This is for translating human-readable game states into vectors and vice-versa.
 """
 
 import numpy as np
-from psai.game.env import State
+from psai.game.objects import State, Cell, Action, PlayerStats
+from psai.game.utils import loc_int_to_tuple, loc_tuple_to_int
+from psai.game.assertions import assertion_loc
 
 def encode_human_to_vector_board(
         state : State,
@@ -24,17 +26,15 @@ def encode_human_to_vector_board(
     tree_size_onehot = np.zeros((37, 5))
     used_onehot = np.zeros(37,)
 
-    owner_map = {"empty": 0, "p1": 1, "p2": 2, "p3": 3, "p4": 4}
-    tree_size_map = {"empty": 0, "seed": 1, "small": 2, "medium": 3, "large": 4}
+    
+    tree_size_map = {None: 0, "seed": 1, "small": 2, "medium": 3, "large": 4}
 
-    i_cell = 0
-    for i_ring in range(4):
-        ring_details = state.board_state[i_ring]
-        for owner, size, used in ring_details:
-            owner_onehot[i_cell, owner_map[owner]] = 1
-            tree_size_onehot[i_cell, tree_size_map[size]] = 1
-            used_onehot[i_cell] = 1 if used else 0
-            i_cell += 1
+    for cell in state.board_state:
+        index = loc_tuple_to_int(cell.loc)
+        owner_idx = cell.owner if cell.owner is not None else 4  # Use index 4 for None/no owner
+        owner_onehot[index, owner_idx] = 1
+        tree_size_onehot[index, tree_size_map[cell.size]] = 1
+        used_onehot[index] = int(cell.used)
 
 
     # ---------------- #
@@ -62,13 +62,10 @@ def encode_human_to_vector_board(
         "large_ready" : 4,
     }
 
-    assert set(norms.keys()) == set(state.player_stats["p1"].keys()), \
-        "Player stats keys do not match expected keys."
-
-    all_player_vectors = np.zeros((4, len(state.player_stats["p1"].keys())))
-    for ip, player in enumerate(["p1", "p2", "p3", "p4"]):
+    all_player_vectors = np.zeros((4, len(norms.keys())))
+    for ip in range(4):
         player_vector = np.array([
-            state.player_stats[player][name] / norms[name]
+            getattr(state.player_stats[ip], name) / norms[name]
             for name in sorted(norms.keys())
         ], dtype=np.float32)
         all_player_vectors[ip, :] = player_vector
@@ -112,18 +109,9 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
 
     Returns
     -------
-    board_state : dict
-        As described in encode_human_to_vector.
-    sun_pos : int
-        Sun position.
-    player_stats : dict
-        Player statistics.
-    active_player : int
-        Index of the active player.
+    State : A human-readable representation of the game state.
     """
-    owner_map = {0: "empty", 1: "p1", 2: "p2", 3: "p3", 4: "p4"}
-    tree_size_map = {0: "empty", 1: "seed", 2: "small", 3: "medium", 4: "large"}
-    player_names = ["p1", "p2", "p3", "p4"]
+    tree_size_map = {0: None, 1: "seed", 2: "small", 3: "medium", 4: "large"}
     
     norms = {
         "light" : 10,
@@ -148,17 +136,20 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
     used_onehot = vector[idx:idx+37]
     idx += 37
 
-    board_state = {}
-    i_cell = 0
-    for i_ring in range(4):
-        ring = []
-        for _ in range(0, [12, 12, 6, 7][i_ring]):
-            owner_idx = int(np.argmax(owner_onehot[i_cell]))
-            size_idx = int(np.argmax(tree_size_onehot[i_cell]))
-            used = bool(round(used_onehot[i_cell]))
-            ring.append((owner_map[owner_idx], tree_size_map[size_idx], used))
-            i_cell += 1
-        board_state[i_ring] = ring
+    board_state = []
+    for i_cell in range(37):
+        owner_idx = int(np.argmax(owner_onehot[i_cell]))
+        size_idx = int(np.argmax(tree_size_onehot[i_cell]))
+        used = bool(round(used_onehot[i_cell]))
+        loc = loc_int_to_tuple(i_cell)
+        assertion_loc(*loc)
+        cell = Cell(
+            loc=loc,
+            owner=owner_idx if owner_idx != 4 else None,  # Index 4 means no owner
+            size=tree_size_map[size_idx],
+            used=used,
+        )
+        board_state.append(cell)
 
     # Sun position
     sun_position_onehot = vector[idx:idx+6]
@@ -169,11 +160,11 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
     all_player_vectors = vector[idx:idx+4*10].reshape((4, 10))
     idx += 4*10
     player_stats = {}
-    for ip, player in enumerate(player_names):
+    for ip in range(4):
         stats = {}
         for i, name in enumerate(sorted(norms.keys())):
             stats[name] = int(round(all_player_vectors[ip, i] * norms[name]))
-        player_stats[player] = stats
+        player_stats[ip] = PlayerStats(**stats)
 
     # Active player
     active_onehot = vector[idx:idx+4]
@@ -182,7 +173,7 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
 
     # Turn
     turn_onehot = vector[idx:idx+5]
-    idx += 4
+    idx += 5
     turn = int(np.argmax(turn_onehot))
 
     state = State(
@@ -196,7 +187,7 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
 
 
 def encode_human_to_int_action(
-        action: dict,
+        action: Action,
     ) -> int:
     """
     Convert a human-readable action into an integer representation.
@@ -214,13 +205,13 @@ def encode_human_to_int_action(
     
     # This is a placeholder implementation.
     # You would need to define how to convert the action dictionary to an integer.
-    
+    #TODO
     return 0  # Replace with actual logic to convert action to integer index.
 
 
 def decode_int_to_human_action(
         action: int,
-    ) -> dict:
+    ) -> Action:
     """
     Convert a vector representation of an action back to a human-readable format.
 
@@ -236,5 +227,5 @@ def decode_int_to_human_action(
     int
         The index of the action in the action space.
     """
-    
-    return {}
+    #TODO
+    ...
