@@ -83,7 +83,7 @@ def encode_human_to_vector_board(
     # -------- #
 
     turn_onehot = np.zeros(5)
-    turn_onehot[state.turn] = 1
+    turn_onehot[state.day] = 1
         
 
     # ----------- #
@@ -181,7 +181,7 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
         sun_pos=sun_pos,
         player_stats=player_stats,
         active_player=active_player,
-        turn=turn,
+        day=turn,
     )
     return state
 
@@ -192,10 +192,17 @@ def encode_human_to_int_action(
     """
     Convert a human-readable action into an integer representation.
 
+    The action space is organized as follows:
+    - Purchase actions: 0-3 (seed, small, medium, large)
+    - Plant seed actions: 4 + (origin_cell_idx * 37 + target_cell_idx) [4 to 1372]
+    - Upgrade actions: 1373 + (cell_idx * 3 + size_idx) [1373 to 1483] 
+    - Harvest actions: 1484 + cell_idx [1484 to 1520]
+    - End turn: 1521
+
     Parameters
     ----------
-    action : dict
-        A dictionary representing the action, typically with keys like "action_type", "target", etc.
+    action : Action
+        An Action object representing the action.
 
     Returns
     -------
@@ -203,29 +210,117 @@ def encode_human_to_int_action(
         The index of the action in the action space.
     """
     
-    # This is a placeholder implementation.
-    # You would need to define how to convert the action dictionary to an integer.
-    #TODO
-    return 0  # Replace with actual logic to convert action to integer index.
+    if action.action_type == 'purchase_tree':
+        if action.size is None:
+            raise ValueError("Purchase action must have a size specified")
+        size_map = {'seed': 0, 'small': 1, 'medium': 2, 'large': 3}
+        return size_map[action.size]
+    
+    elif action.action_type == 'plant_seed':
+        if action.origin_loc is None or action.target_loc is None:
+            raise ValueError("Plant seed action must have both origin_loc and target_loc specified")
+        origin_idx = loc_tuple_to_int(action.origin_loc)
+        target_idx = loc_tuple_to_int(action.target_loc)
+        return 4 + origin_idx * 37 + target_idx
+    
+    elif action.action_type == 'upgrade_tree':
+        if action.target_loc is None or action.size is None:
+            raise ValueError("Upgrade action must have target_loc and size specified")
+        cell_idx = loc_tuple_to_int(action.target_loc)
+        size_map = {'small': 0, 'medium': 1, 'large': 2}
+        size_idx = size_map[action.size]
+        return 1373 + cell_idx * 3 + size_idx
+    
+    elif action.action_type == 'harvest_tree':
+        if action.target_loc is None:
+            raise ValueError("Harvest action must have target_loc specified")
+        cell_idx = loc_tuple_to_int(action.target_loc)
+        return 1484 + cell_idx
+    
+    elif action.action_type == 'end_turn':
+        return 1521
+    
+    else:
+        raise ValueError(f"Unknown action type: {action.action_type}")
 
 
 def decode_int_to_human_action(
-        action: int,
+        action_int: int,
     ) -> Action:
     """
-    Convert a vector representation of an action back to a human-readable format.
+    Convert an integer action index back to a human-readable Action format.
+
+    The action space is organized as follows:
+    - Purchase actions: 0-3 (seed, small, medium, large)
+    - Plant seed actions: 4 + (origin_cell_idx * 37 + target_cell_idx) [4 to 1372]
+    - Upgrade actions: 1373 + (cell_idx * 3 + size_idx) [1373 to 1483] 
+    - Harvest actions: 1484 + cell_idx [1484 to 1520]
+    - End turn: 1521
 
     Parameters
     ----------
-    vector : np.ndarray
-        A 1D numpy array representing the action.
-    action_space_size : int
-        The size of the action space.
+    action_int : int
+        The integer index of the action.
 
     Returns
     -------
-    int
-        The index of the action in the action space.
+    Action
+        An Action object representing the action.
     """
-    #TODO
-    ...
+    
+    if 0 <= action_int <= 3:
+        # Purchase action
+        size_map = {0: 'seed', 1: 'small', 2: 'medium', 3: 'large'}
+        return Action(
+            action_type='purchase_tree',
+            size=size_map[action_int],
+            origin_loc=None,
+            target_loc=None,
+        )
+    
+    elif 4 <= action_int <= 1372:
+        # Plant seed action
+        adjusted_idx = action_int - 4
+        origin_idx = adjusted_idx // 37
+        target_idx = adjusted_idx % 37
+        return Action(
+            action_type='plant_seed',
+            size=None,
+            origin_loc=loc_int_to_tuple(origin_idx),
+            target_loc=loc_int_to_tuple(target_idx),
+        )
+    
+    elif 1373 <= action_int <= 1483:
+        # Upgrade action
+        adjusted_idx = action_int - 1373
+        cell_idx = adjusted_idx // 3
+        size_idx = adjusted_idx % 3
+        size_map = {0: 'small', 1: 'medium', 2: 'large'}
+        return Action(
+            action_type='upgrade_tree',
+            size=size_map[size_idx],
+            origin_loc=None,
+            target_loc=loc_int_to_tuple(cell_idx),
+        )
+    
+    elif 1484 <= action_int <= 1520:
+        # Harvest action
+        cell_idx = action_int - 1484
+        return Action(
+            action_type='harvest_tree',
+            size=None,
+            origin_loc=None,
+            target_loc=loc_int_to_tuple(cell_idx),
+        )
+    
+    elif action_int == 1521:
+        # End turn action
+        return Action(
+            action_type='end_turn',
+            size=None,
+            origin_loc=None,
+            target_loc=None,
+        )
+    
+    else:
+        raise ValueError(f"Invalid action index: {action_int}. Valid range is 0-1521.")

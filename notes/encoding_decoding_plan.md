@@ -8,9 +8,9 @@ Let $S$ be the board state, $A$ be the action representation, $v$ be vector or i
 
 1. $\quad S_v \rightarrow S_h\quad$  `decode_vector_to_human_board` ✅
 2. $\quad S_h \rightarrow \{A_h\}\quad$  `get_allowed_actions`
-3. $\quad \{A_h\} \rightarrow \{A_v\}\quad$  `encode_human_to_int_action`
+3. $\quad \{A_h\} \rightarrow \{A_v\}\quad$  `encode_human_to_int_action` ✅
 4. $\quad \{A_v\} \rightarrow A^*_v\quad$  `agent`
-5. $\quad A^*_v \rightarrow A^*_h\quad$  `decode_int_to_human_action`
+5. $\quad A^*_v \rightarrow A^*_h\quad$  `decode_int_to_human_action` ✅
 6. $\quad A^*_h, S_h \rightarrow S^\prime_h\quad$  `update_board_from_action` (include rotation)
 7. $\quad S^\prime_h \rightarrow S^\prime_v\quad$  `encode_human_to_vector_board` ✅
 

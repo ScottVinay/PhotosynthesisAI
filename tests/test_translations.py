@@ -1,6 +1,7 @@
 import numpy as np
 from psai.game.translations import encode_human_to_vector_board, decode_vector_to_human_board
 from psai.game.objects import State, Cell, PlayerStats
+from psai.game.translations import encode_human_to_int_action, decode_int_to_human_action
 
 def sample_game_state():
     board_state = [
@@ -72,10 +73,10 @@ def sample_game_state():
         sun_pos=sun_pos,
         player_stats=player_stats,
         active_player=active_player,
-        turn=turn,
+        day=turn,
     )
 
-def test_encode_decode_roundtrip():
+def test_state_roundtrip():
     istate = sample_game_state()
     vector = encode_human_to_vector_board(istate)
     dstate = decode_vector_to_human_board(vector)
@@ -91,11 +92,20 @@ def test_encode_decode_roundtrip():
     assert dstate.sun_pos == istate.sun_pos
     assert dstate.player_stats == istate.player_stats
     assert dstate.active_player == istate.active_player
-    assert dstate.turn == istate.turn
+    assert dstate.day == istate.day
 
-def test_encode_decode_encode():
+def test_state_roundtrip_plus():
     istate = sample_game_state()
     vector_1 = encode_human_to_vector_board(istate)
     dstate = decode_vector_to_human_board(vector_1)
     vector_2 = encode_human_to_vector_board(dstate)
     assert np.array_equal(vector_1, vector_2), "Vectors do not match after encode-decode-encode roundtrip."
+
+def test_action_roundtrip():
+    """
+    Test that the encode-decode-encode roundtrip for actions works correctly.
+    """
+    for iact in range(1521+1):
+        action = decode_int_to_human_action(iact)
+        jact = encode_human_to_int_action(action)
+        assert jact == iact, f"Action encoding/decoding failed for action {action} with int {iact}. Encoded to {jact}."

@@ -3,28 +3,31 @@ from typing import Optional
 from psai.game.assertions import assertion_loc
 
 
-def rotate_cell(
+def rotate_loc(
     ring: int,
     theta: int,
     rotation: int
-) -> int:
+) -> tuple[int, int]:
     """
     Rotates the cell index.
     """
     assertion_loc(ring, theta)
 
+    n = rotation * (3 - ring)  
+
     if ring == 0:
-        return (theta + rotation) % 18
+        new_theta = (theta + n) % 18
     elif ring == 1:
-        return (theta + rotation) % 12
+        new_theta = (theta + n) % 12
     elif ring == 2:
-        return (theta + rotation) % 6
+        new_theta = (theta + n) % 6
     else:
         assert ring == 3
-        return theta
+        new_theta = theta
+    return (ring, new_theta)
     
 
-def get_shaded_cells(
+def get_shaded_locs(
         ring : int,
         theta : int,
         sun_pos : int
@@ -38,25 +41,68 @@ def get_shaded_cells(
     """
     assertion_loc(ring, theta)
 
-    rotated_input_cell = rotate_cell(ring, theta, sun_pos) #TODO should be minus?
-    rotated_results = get_shaded_cells(ring, rotated_input_cell, 0)
+    if sun_pos != 0:
+        rotated_input_loc = rotate_loc(ring, theta, -sun_pos)
+        rotated_results = get_shaded_locs(*rotated_input_loc, 0)
+        
+        shaded_locs = []
+        for loc in rotated_results:
+            if loc is not None:
+                assertion_loc(loc[0], loc[1])
+                unrotated_loc = rotate_loc(
+                    loc[0],
+                    loc[1],
+                    sun_pos
+                )
+                shaded_locs.append(unrotated_loc)
+            else:
+                shaded_locs.append(None)
 
-    unrotated_results = []
-    for loc in rotated_results:
-        if loc is not None:
-            assertion_loc(loc[0], loc[1])
-            unrotated_cell = rotate_cell(
-                loc[0],
-                loc[1],
-                -sun_pos
-            )
-            unrotated_results.append((loc[0], unrotated_cell))
-        else:
-            unrotated_results.append(None)
+        assert len(shaded_locs) == 3
 
-    assert len(unrotated_results) == 3
-    return tuple(unrotated_results)
+    else:
+        mapping = {
+            (0, 0): [(1, 0), (2, 0), (3, 0)],
+            (0, 1): [(1, 1), (2, 1), (2, 2)],
+            (0, 2): [(1, 2), (1, 3), (1, 4)],
+            (0, 3): [(0, 4), (0, 5), (0, 6)],
+            (0, 4): [(0, 5), (0, 6), None],
+            (0, 5): [(0, 6), None, None],
+            (0, 6): [None, None, None],
+            (0, 7): [None, None, None],
+            (0, 8): [None, None, None],
+            (0, 9): [None, None, None],
+            (0, 10): [None, None, None],
+            (0, 11): [None, None, None],
+            (0, 12): [None, None, None],
+            (0, 13): [(0, 12), None, None],
+            (0, 14): [(0, 13), (0, 12), None],
+            (0, 15): [(0, 14), (0, 13), (0, 12)],
+            (0, 16): [(1, 10), (1, 9), (1, 8)],
+            (0, 17): [(1, 11), (2, 5), (2, 4)],
+            (1, 0): [(2, 0), (3, 0), None],
+            (1, 1): [(2, 1), (2, 2), (1, 5)],
+            (1, 2): [(1, 3), (1, 4), (0, 7)],
+            (1, 3): [(1, 4), (0, 7), None],
+            (1, 4): [(0, 7), None, None],
+            (1, 5): [(0, 8), None, None],
+            (1, 6): [(0, 9), None, None],
+            (1, 7): [(0, 10), None, None],
+            (1, 8): [(0, 11), None, None],
+            (1, 9): [(1, 8), (0, 11), None],
+            (1, 10): [(1, 9), (1, 8), (0, 11)],
+            (1, 11): [(2, 5), (2, 4), (1, 7)],
+            (2, 0): [(3, 0), (2, 3), (1, 6)],
+            (2, 1): [(2, 2), (1, 5), (0, 8)],
+            (2, 2): [(1, 5), (0, 8), None],
+            (2, 3): [(1, 6), (0, 9), None],
+            (2, 4): [(1, 7), (0, 10), None],
+            (2, 5): [(2, 4), (1, 7), (0, 10)],
+            (3, 0): [(2, 3), (1, 6), (0, 9)],
+        }
+        shaded_locs = mapping[(ring, theta)]
 
+    return (shaded_locs[0], shaded_locs[1], shaded_locs[2])
 
 def create_rotation_index(board_moves_clockwise : bool) -> np.ndarray:
     """

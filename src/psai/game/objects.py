@@ -64,14 +64,14 @@ class State:
     sun_pos: int
     player_stats: dict[int, PlayerStats]
     active_player: int
-    turn: int
+    day: int
 
     def __post_init__(self):
         self.verify_board_state(self.board_state)
         self.verify_sun_pos(self.sun_pos)
         self.verify_player_stats(self.player_stats)
         self.verify_active_player(self.active_player)
-        self.verify_turn(self.turn)
+        self.verify_turn(self.day)
 
     def verify_board_state(self, board_state : list[Cell]):
         for cell in board_state:
@@ -95,6 +95,16 @@ class State:
         
     def verify_turn(self, turn: int):
         assert turn >= 0 and turn < 5
+
+    def get_cell_at_loc(self, loc: tuple[int, int]) -> Cell:
+        """
+        Returns the cell at the given location.
+        """
+        assertion_loc(*loc)
+        for cell in self.board_state:
+            if cell.loc == loc:
+                return cell
+        raise ValueError(f"No cell found at valid location {loc}.")
 
 
 @dataclass
