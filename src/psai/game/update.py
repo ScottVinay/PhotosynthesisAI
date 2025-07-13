@@ -5,6 +5,7 @@ File for the main function for updating the state of the game.
 from psai.game.assertions import assertion_loc
 from psai.game.objects import State, Cell, Action, PlayerStats
 from psai.game.actions import get_purchase_cost
+from psai.game.utils import get_score_from_n_score_cards_taken
 
 def update_state(
         state: State,
@@ -130,7 +131,8 @@ def update_state(
         target_cell.used = True
         
         # Update player stats
-        state.player_stats[state.active_player].score += 1
+        state.player_stats[state.active_player].score += get_score_from_n_score_cards_taken(state.n_score_cards_taken)
+        state.n_score_cards_taken += 1
         state.player_stats[state.active_player].large_stash += 1
         state.player_stats[state.active_player].light -= 4
 
@@ -160,3 +162,18 @@ def update_state(
         for cell in state.board_state:
             cell.used = False
         
+        #TODO Rotate the board state?
+        #TODO Sun back to 0?
+
+
+def distribute_light(state: State) -> None:
+    """
+    Distribute light to all players based on the current sun position.
+
+    Parameters
+    ----------
+    state : State
+        The current game state.
+    """
+    ...
+    #TODO complete

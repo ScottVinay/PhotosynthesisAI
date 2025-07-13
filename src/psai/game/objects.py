@@ -59,12 +59,16 @@ class State:
 
     active_player : int < 4
         The index of the active player (0, 1, 2, or 3).
+    
+    n_score_cards_taken : int
+        An integer value from 0 to 20 representing additional game resources.
     """
     board_state: list[Cell]
     sun_pos: int
     player_stats: dict[int, PlayerStats]
     active_player: int
     day: int
+    n_score_cards_taken: int
 
     def __post_init__(self):
         self.verify_board_state(self.board_state)
@@ -72,6 +76,7 @@ class State:
         self.verify_player_stats(self.player_stats)
         self.verify_active_player(self.active_player)
         self.verify_turn(self.day)
+        self.verify_n_score_cards_taken(self.n_score_cards_taken)
 
     def verify_board_state(self, board_state : list[Cell]):
         for cell in board_state:
@@ -87,7 +92,6 @@ class State:
         for ip in range(4):
             if ip not in player_stats.keys():
                 raise ValueError(f"Missing stats for player: {ip}")
-            
 
     def verify_active_player(self, active_player: int):
         if not (0 <= active_player < 4):
@@ -95,6 +99,9 @@ class State:
         
     def verify_turn(self, turn: int):
         assert turn >= 0 and turn < 5
+
+    def verify_n_score_cards_taken(self, n_score_cards_taken: int):
+        assert 0 <= n_score_cards_taken <= 20, f"Invalid resource count: {n_score_cards_taken}. Must be in range [0, 20]."
 
     def get_cell_at_loc(self, loc: tuple[int, int]) -> Cell:
         """

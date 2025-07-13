@@ -84,6 +84,12 @@ def encode_human_to_vector_board(
 
     turn_onehot = np.zeros(5)
     turn_onehot[state.day] = 1
+    
+    # ------------------- #
+    #   Resource count    #
+    # ------------------- #
+
+    n_score_cards_taken_normalized = np.array([state.n_score_cards_taken / 20.0], dtype=np.float32)
         
 
     # ----------- #
@@ -98,6 +104,7 @@ def encode_human_to_vector_board(
         all_player_vectors.flatten(),
         active_onehot.flatten(),
         turn_onehot.flatten(),
+        n_score_cards_taken_normalized.flatten(),
     ])
 
     return vector
@@ -176,12 +183,18 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
     idx += 5
     turn = int(np.argmax(turn_onehot))
 
+    # Resource count
+    n_score_cards_taken_normalized = vector[idx:idx+1]
+    idx += 1
+    n_score_cards_taken = int(round(n_score_cards_taken_normalized[0] * 20.0))
+
     state = State(
         board_state=board_state,
         sun_pos=sun_pos,
         player_stats=player_stats,
         active_player=active_player,
         day=turn,
+        n_score_cards_taken=n_score_cards_taken,
     )
     return state
 

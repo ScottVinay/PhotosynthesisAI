@@ -68,12 +68,14 @@ def sample_game_state():
     }
     active_player = 2
     turn = 0
+    n_score_cards_taken = 15
     return State(
         board_state=board_state,
         sun_pos=sun_pos,
         player_stats=player_stats,
         active_player=active_player,
         day=turn,
+        n_score_cards_taken=n_score_cards_taken,
     )
 
 def test_state_roundtrip():
@@ -93,6 +95,7 @@ def test_state_roundtrip():
     assert dstate.player_stats == istate.player_stats
     assert dstate.active_player == istate.active_player
     assert dstate.day == istate.day
+    assert dstate.n_score_cards_taken == istate.n_score_cards_taken
 
 def test_state_roundtrip_plus():
     istate = sample_game_state()

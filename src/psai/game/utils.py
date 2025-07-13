@@ -179,3 +179,45 @@ def loc_int_to_tuple(ind: int) -> tuple[int, int]:
         theta = 0
     return ring, theta
     
+
+def get_score_from_n_score_cards_taken(
+        n_score_cards_taken: int
+    ) -> int:
+    """
+    Get a score based on the number of score cards already taken
+    (before the one about to be taken).
+
+    Parameters
+    ----------
+    n_score_cards_taken : int
+        The number of score cards taken, which should be between 0 and 20.
+
+    Returns
+    -------
+    int
+        The score corresponding to the number of score cards taken.
+    """
+    scores = [
+        14, # 0
+        13, # 1
+        12, # 2
+        11, # 3
+        10, # 4
+        9,  # 5
+        8,  # 6
+        7,  # 7
+        6,  # 8
+        5,  # 9
+        4,  # 10
+        3,  # 11
+        2,  # 12
+        1,  # 13
+        0,  # 14
+        0,  # 15
+        0,  # 16
+        0,  # 17
+        0,  # 18
+        0,  # 19
+        0,  # 20
+    ]
+    return scores[n_score_cards_taken]
