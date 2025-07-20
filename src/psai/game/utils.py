@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Optional
 from psai.game.assertions import assertion_loc
+from psai.game.objects import State, Cell, PlayerStats
 
 
 def rotate_loc(
@@ -10,6 +11,7 @@ def rotate_loc(
 ) -> tuple[int, int]:
     """
     Rotates the cell index.
+    Rotation is a number of 1/6 turns, where positive is clockwise.
     """
     assertion_loc(ring, theta)
 
@@ -25,6 +27,15 @@ def rotate_loc(
         assert ring == 3
         new_theta = theta
     return (ring, new_theta)
+
+
+def rotate_board(
+        state: State,
+        rotation: int,
+    ) -> None:
+    for cell in state.board_state:
+        new_loc = rotate_loc(*cell.loc, rotation)
+        setattr(cell, 'loc', new_loc)
     
 
 def get_shaded_locs(

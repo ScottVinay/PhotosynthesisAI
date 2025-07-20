@@ -6,6 +6,8 @@ from psai.game.assertions import assertion_loc
 from psai.game.objects import State, Cell, Action, PlayerStats
 from psai.game.actions import get_purchase_cost
 from psai.game.utils import get_score_from_n_score_cards_taken
+from psai.control.config import load_config
+from psai.game.utils import rotate_board
 
 def update_state(
         state: State,
@@ -164,8 +166,11 @@ def update_state(
         for cell in state.board_state:
             cell.used = False
         
-        #TODO Rotate the board state?
-        #TODO Sun back to 0?
+        # Rotate the board back to the original position
+        config = load_config()
+        if config.sun_stays_at_zero:
+            rotate_board(state, -1)
+            state.sun_pos = 0
 
 
 def distribute_light(state: State) -> None:
