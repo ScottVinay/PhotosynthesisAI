@@ -1,5 +1,5 @@
 from psai.game.objects import State, Cell, PlayerStats
-from psai.game.utils import loc_int_to_tuple, loc_tuple_to_int, get_shaded_locs
+from psai.game.utils import loc_int_to_tuple, loc_tuple_to_int, get_shaded_locs, rotate_board
 
 def test_int_tuple_roundtrip():
     """
@@ -30,6 +30,19 @@ def test_get_shaded_cells():
         expected_set = set(expected_cells)
         assert set(shaded_cells) == expected_set, f"Expected {expected_set}, got {set(shaded_cells)} for ring {ring}, theta {theta}, sun_pos {sun_pos}"
 
+
+def test_rotate_board_six_times(sample_game_state: State):
+    state = sample_game_state
+    original_board = [Cell(**cell.__dict__) for cell in state.board_state]
+    for i in range(5):
+        rotate_board(state, 1)
+        assert any(cell1.loc != cell2.loc for cell1, cell2 in zip(state.board_state, original_board)), f"Board should change after rotation {i+1}"
+    rotate_board(state, 1)
+    assert all(cell1.loc == cell2.loc for cell1, cell2 in zip(state.board_state, original_board)), "Board should return to original state after 6 rotations"
+    assert all(cell1.owner == cell2.owner for cell1, cell2 in zip(state.board_state, original_board)), "Owners should remain unchanged after rotations"
+    assert all(cell1.size == cell2.size for cell1, cell2 in zip(state.board_state, original_board)), "Sizes should remain unchanged after rotations"
+    assert all(cell1.used == cell2.used for cell1, cell2 in zip(state.board_state, original_board)), "Used status should remain unchanged after rotations"
+    
 
 if __name__ == "__main__":
     test_get_shaded_cells()
