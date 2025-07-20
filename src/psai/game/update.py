@@ -152,6 +152,8 @@ def update_state(
         if state.active_player == 0:
             # Rotate the sun position if all players have gone.
             state.sun_pos = (state.sun_pos + 1) % 6
+            # Also update the hour (same as sun_pos)
+            state.hour = (state.hour + 1) % 6
 
             # Increment the turn counter if the sun position is at 0
             if state.sun_pos == 0:

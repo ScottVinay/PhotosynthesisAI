@@ -55,6 +55,9 @@ class State:
     sun_pos : int < 6
         The position of the sun in the game, typically an integer representing the current sun's position.
 
+    hour : int < 6
+        The hour of the day, an integer from 0 to 5, similar to sun_pos.
+
     player_stats : dict[int, PlayerStats]
 
     active_player : int < 4
@@ -65,6 +68,7 @@ class State:
     """
     board_state: list[Cell]
     sun_pos: int
+    hour: int
     player_stats: dict[int, PlayerStats]
     active_player: int
     day: int
@@ -73,6 +77,7 @@ class State:
     def __post_init__(self):
         self.verify_board_state(self.board_state)
         self.verify_sun_pos(self.sun_pos)
+        self.verify_hour(self.hour)
         self.verify_player_stats(self.player_stats)
         self.verify_active_player(self.active_player)
         self.verify_turn(self.day)
@@ -87,6 +92,10 @@ class State:
     def verify_sun_pos(self, sun_pos: int):
         if not (0 <= sun_pos < 6):
             raise ValueError(f"Invalid sun position: {sun_pos}. Must be in range [0, 5].")
+        
+    def verify_hour(self, hour: int):
+        if not (0 <= hour < 6):
+            raise ValueError(f"Invalid hour: {hour}. Must be in range [0, 5].")
         
     def verify_player_stats(self, player_stats: dict[int, PlayerStats]):
         for ip in range(4):

@@ -47,7 +47,7 @@ class MultiplayerEnvWrapper:
 class PhotosynthesisEnv(gym.Env):
     def __init__(self):
         super().__init__()
-        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(463,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(5)
         self.state = np.zeros(10)
 

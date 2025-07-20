@@ -20,7 +20,7 @@ def create_minimal_state(n_score_cards_taken: int):
     for ring in range(4):
         if ring == 0:
             max_theta = 18
-            start_cell = 1 if ring == 0 else 0  # Skip (0,0) since it's already added
+            start_cell = 1 if ring == 0 else 0 
         elif ring == 1:
             max_theta = 12
             start_cell = 0
@@ -45,6 +45,7 @@ def create_minimal_state(n_score_cards_taken: int):
     return State(
         board_state=board_state,
         sun_pos=0,
+        hour=0,
         player_stats=player_stats,
         active_player=0,
         day=0,
@@ -86,7 +87,7 @@ def test_vector_size():
     state = create_minimal_state(10)
     vector = encode_human_to_vector_board(state)
     
-    expected_size = 463  # As calculated: 185+185+37+6+40+4+5+1
+    expected_size = 469  # As calculated: 185+185+37+6+6+40+4+5+1
     actual_size = vector.shape[0]
     
     print(f"Expected vector size: {expected_size}")

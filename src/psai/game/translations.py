@@ -44,6 +44,13 @@ def encode_human_to_vector_board(
     sun_position_onehot = np.zeros(6)
     sun_position_onehot[state.sun_pos] = 1
 
+    # --------- #
+    #   Hour    #
+    # --------- #
+        
+    hour_onehot = np.zeros(6)
+    hour_onehot[state.hour] = 1
+
 
     # ---------------- #
     #   Player stats   #
@@ -101,6 +108,7 @@ def encode_human_to_vector_board(
         tree_size_onehot.flatten(),
         used_onehot.flatten(),
         sun_position_onehot.flatten(),
+        hour_onehot.flatten(),
         all_player_vectors.flatten(),
         active_onehot.flatten(),
         turn_onehot.flatten(),
@@ -163,6 +171,11 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
     sun_pos = int(np.argmax(sun_position_onehot))
     idx += 6
 
+    # Hour
+    hour_onehot = vector[idx:idx+6]
+    hour = int(np.argmax(hour_onehot))
+    idx += 6
+
     # Player stats
     all_player_vectors = vector[idx:idx+4*10].reshape((4, 10))
     idx += 4*10
@@ -191,6 +204,7 @@ def decode_vector_to_human_board(vector: np.ndarray) -> State:
     state = State(
         board_state=board_state,
         sun_pos=sun_pos,
+        hour=hour,
         player_stats=player_stats,
         active_player=active_player,
         day=turn,

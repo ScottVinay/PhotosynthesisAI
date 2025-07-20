@@ -44,6 +44,7 @@ def sample_game_state():
         Cell(loc=(3,0), owner=3, size='large', used=False),
     ]
     sun_pos = 3
+    hour = 3
     player_stats = {
         0: PlayerStats(
             light=5, score=2, seed_stash=1, seed_ready=2,
@@ -72,6 +73,7 @@ def sample_game_state():
     return State(
         board_state=board_state,
         sun_pos=sun_pos,
+        hour=hour,
         player_stats=player_stats,
         active_player=active_player,
         day=turn,
@@ -92,6 +94,7 @@ def test_state_roundtrip():
         else:
             raise ValueError('No matching cell found')
     assert dstate.sun_pos == istate.sun_pos
+    assert dstate.hour == istate.hour
     assert dstate.player_stats == istate.player_stats
     assert dstate.active_player == istate.active_player
     assert dstate.day == istate.day
