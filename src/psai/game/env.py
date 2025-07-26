@@ -4,7 +4,7 @@ from typing import Iterable, Optional
 from psai.agents.base import BaseAgent
 from psai.game.translations import decode_int_to_human_action
 from dataclasses import dataclass
-from psai.game.assertions import assertion_loc s
+from psai.game.assertions import assertion_loc
 from psai.game.objects import Action, TSIZES
 import psai.visuals.mpl_render as mpl_render
 
