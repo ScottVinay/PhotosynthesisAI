@@ -4,11 +4,11 @@ from typing import Iterable, Optional
 from psai.agents.base import BaseAgent
 from psai.game.translations import decode_int_to_human_action
 from dataclasses import dataclass
-from psai.game.assertions import assertion_loc 
+from psai.game.assertions import assertion_loc s
 from psai.game.objects import Action, TSIZES
+import psai.visuals.mpl_render as mpl_render
 
-
-class MultiplayerEnvWrapper:
+class MultiplayerEnvWrapper(gym.Env):
     """
     The step of PhotosynthesisEnv returns the next state. However,
     if we are training just one model, then the next observation is 
@@ -45,11 +45,13 @@ class MultiplayerEnvWrapper:
 
 
 class PhotosynthesisEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, render_mode: Optional[str] = None):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(5)
         self.state = np.zeros(10)
+        if render_mode == 'matplotlib':
+            self.renderer = mpl_render.MplRenderer()
 
     def reset(self, *, seed=None, options=None):
         self.state = np.zeros(10)
