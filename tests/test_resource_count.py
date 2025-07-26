@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 """
 Test script to verify that the new n_score_cards_taken attribute works correctly
 """
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-
 from psai.game.objects import State, Cell, PlayerStats
 from psai.game.translations import encode_human_to_vector_board, decode_vector_to_human_board
 import numpy as np

@@ -3,7 +3,6 @@ from typing import Optional
 from psai.game.assertions import assertion_loc
 from psai.game.objects import State, Cell, PlayerStats
 
-
 def rotate_loc(
     ring: int,
     theta: int,
