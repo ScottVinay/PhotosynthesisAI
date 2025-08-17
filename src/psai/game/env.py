@@ -5,7 +5,7 @@ from psai.agents.base import BaseAgent
 from psai.game.translations import decode_int_to_human_action
 from dataclasses import dataclass
 from psai.game.assertions import assertion_loc
-from psai.game.objects import Action, TSIZES
+from psai.game.objects import Action, TSIZES, State, Cell, PlayerStats
 import psai.visuals.mpl_render as mpl_render
 
 class MultiplayerEnvWrapper(gym.Env):
@@ -45,6 +45,7 @@ class MultiplayerEnvWrapper(gym.Env):
 
 
 class PhotosynthesisEnv(gym.Env):
+    # TODO
     def __init__(self, render_mode: Optional[str] = None):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
