@@ -1,12 +1,14 @@
 import gymnasium as gym
 import numpy as np
 from typing import Iterable, Optional
-from psai.agents.base import BaseAgent
-from psai.game.translations import decode_int_to_human_action
 from dataclasses import dataclass
+from psai.agents.base import BaseAgent
+from psai.game.translations import decode_int_to_human_action, encode_human_to_vector_board
 from psai.game.assertions import assertion_loc
-from psai.game.objects import Action, TSIZES, State, Cell, PlayerStats
-import psai.visuals.mpl_render as mpl_render
+from psai.game.objects import Action, TSIZES, VALID_CELLS, State, Cell, PlayerStats
+from psai.game.update import update_state
+from psai.game.endgame import check_has_game_ended, calculate_reward
+from psai.visuals.mpl_render import MplRenderer
 
 class MultiplayerEnvWrapper(gym.Env):
     """
@@ -49,24 +51,62 @@ class PhotosynthesisEnv(gym.Env):
     def __init__(self, render_mode: Optional[str] = None):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
-        self.action_space = gym.spaces.Discrete(5)
-        self.state = np.zeros(10)
+        self.action_space = gym.spaces.Discrete(1521+1)
+        self.state_h: State
+        
         if render_mode == 'matplotlib':
-            self.renderer = mpl_render.MplRenderer()
+            self.renderer = MplRenderer()
 
     def reset(self, *, seed=None, options=None):
-        self.state = np.zeros(10)
-        return self.state, {}
+        super().reset(seed=seed)
+        initial_player_stats = {
+            'light': 0,
+            'score': 0,
+            'seed_stash': 4,
+            'seed_ready': 0,
+            'small_stash': 4,
+            'small_ready': 0,
+            'medium_stash': 3,
+            'medium_ready': 0,
+            'large_stash': 2,
+            'large_ready': 0
+        }
+        self.state_h = State(
+            board_state=[Cell(loc=l, owner=None, size=None, used=False) for l in VALID_CELLS],
+            sun_pos=0,
+            hour=0,
+            player_stats={i: PlayerStats(**initial_player_stats) for i in range(4)},
+            active_player=0,
+            day=0,
+            n_score_cards_taken=0
+        )
+        #TODO For now, initial placements are random. This should be another pre-round and new action type.
+        for i in range(2):
+            for p in range(4):
+                self.state_h.get_cell_at_loc((i, p)).owner = p
+                self.state_h.get_cell_at_loc((i, p)).size = 'small'
+        state_v = encode_human_to_vector_board(self.state_h)
+        return state_v
 
-    def step(self, action):
-        # Apply action logic here
-        # Note: planting a seed from a tree "uses" both the tree cell and the seed cell.
-        reward = 0
+    def step(self, action: int):
+        action_h = decode_int_to_human_action(action)
+        update_state(self.state_h, action_h)
+        self.state_v = encode_human_to_vector_board(self.state_h)
+        
         done = False
         truncated = False
+        reward = 0
+
+        is_ended = check_has_game_ended(self.state_h)
+        if is_ended:
+            done = True
+            reward_dict = calculate_reward(self.state_h)
+
+            reward = reward_dict[self.state_h.active_player] #TODO not right(?) just to get working
+        
         info = {}
 
-        return self.state, reward, done, truncated, info
+        return self.state_v, reward, done, truncated, info
 
     def render(self, mode="human"):
         print("Rendering not implemented.")
