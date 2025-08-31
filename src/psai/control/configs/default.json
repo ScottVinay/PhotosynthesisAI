@@ -1,3 +1,4 @@
 {
-    "sun_stays_at_zero": false
+    "sun_stays_at_zero": false,
+    "reward_method": "score"
 }

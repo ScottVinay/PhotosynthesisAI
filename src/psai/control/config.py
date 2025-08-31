@@ -7,6 +7,11 @@ from psai import control  # this points to the folder containing config.json
 @dataclass
 class ControlConfig:
     sun_stays_at_zero: bool
+    reward_method: str
+
+    def __post_init__(self):
+        if self.reward_method not in ["score", "normed", "winner"]:
+            raise ValueError(f"Invalid reward_method: {self.reward_method}")
 
 # Singleton-ish instance cache
 _config_instance: ControlConfig | None = None
