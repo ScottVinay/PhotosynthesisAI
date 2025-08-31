@@ -86,7 +86,8 @@ class PhotosynthesisEnv(gym.Env):
                 self.state_h.get_cell_at_loc((i, p)).owner = p
                 self.state_h.get_cell_at_loc((i, p)).size = 'small'
         state_v = encode_human_to_vector_board(self.state_h)
-        return state_v
+        info = {}
+        return state_v, info
 
     def step(self, action: int):
         action_h = decode_int_to_human_action(action)

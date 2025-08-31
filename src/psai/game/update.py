@@ -57,6 +57,8 @@ def update_state(
         setattr(state.player_stats[state.active_player], stash_attr, getattr(state.player_stats[state.active_player], stash_attr) - 1)
         setattr(state.player_stats[state.active_player], ready_attr, getattr(state.player_stats[state.active_player], ready_attr) + 1)
         
+    #TODO When removing a tree from the board, send it back to stash
+    #TODO Make tests for sending trees to stash
 
     #----------------#
     #   Plant seed   #

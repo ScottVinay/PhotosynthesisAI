@@ -172,7 +172,7 @@ def loc_int_to_tuple(ind: int) -> tuple[int, int]:
     tuple[int, int]
         A tuple where the first element is the ring (0-3) and the second element is the cell index within that ring.
     """
-    assert isinstance(ind, int), f"Expected an integer index, got {type(ind)}"
+    assert isinstance(ind, int) or isinstance(ind, np.int64), f"Expected an integer index, got {type(ind)}"
     assert 0 <= ind < 37, f"Index {ind} out of bounds (0-36)"
 
     if ind < 18:
