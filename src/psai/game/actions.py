@@ -54,6 +54,8 @@ def get_allowed_actions(state : State) -> list[Action]:
             )
             allowed_actions.append(act)
 
+    #TODO Plant initial - outer ring, no origin
+
     # --------- #
     #   Plant   #
     # --------- #

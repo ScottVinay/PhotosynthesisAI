@@ -3,6 +3,15 @@ from typing import Optional
 from dataclasses import dataclass
 
 TSIZES = ['seed', 'small', 'medium', 'large']
+VALID_CELLS = []
+for i in range(18):
+    VALID_CELLS.append((0, i))
+for i in range(12):
+    VALID_CELLS.append((1, i))
+for i in range(6):
+    VALID_CELLS.append((2, i))
+VALID_CELLS.append((3, 0))
+
 
 @dataclass
 class Cell:
@@ -62,7 +71,10 @@ class State:
 
     active_player : int < 4
         The index of the active player (0, 1, 2, or 3).
-    
+
+    day : int
+        The current day in the game, max is 3.
+
     n_score_cards_taken : int
         An integer value from 0 to 20 representing additional game resources.
     """

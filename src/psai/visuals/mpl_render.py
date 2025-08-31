@@ -235,12 +235,8 @@ def sample_game_state():
     )
 
 if __name__ == "__main__":
-    # Create a sample state
     state = sample_game_state()
-    renderer = GameRenderer()
-    
-    # Render and display
+    renderer = MplRenderer()
+
     renderer.render_state(state)
     
-    # Or save to file
-    # renderer.render_state(state, save_path="game_state.png", show=False)
