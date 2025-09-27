@@ -6,8 +6,10 @@ from psai.game.assertions import assertion_loc
 from psai.game.objects import State, Cell, Action, PlayerStats
 from psai.game.actions import get_purchase_cost
 from psai.game.utils import get_score_from_n_score_cards_taken
-from psai.control.config import load_config
 from psai.game.utils import rotate_board
+from psai.control.config import load_config
+
+from pprint import pprint
 
 def update_state(
         state: State,
@@ -153,6 +155,9 @@ def update_state(
         # Update active player
         state.active_player = (state.active_player + 1) % 4
 
+        # Distribute light if all players have played
+        distribute_light(state)
+
         if state.active_player == 0:
             # Rotate the sun position if all players have gone.
             state.sun_pos = (state.sun_pos + 1) % 6
@@ -173,6 +178,10 @@ def update_state(
         if config.sun_stays_at_zero:
             rotate_board(state, -1)
             state.sun_pos = 0
+
+    for ip, p in state.player_stats.items():
+        for k in ["light","score","seed_stash","seed_ready","small_stash","small_ready","medium_stash","medium_ready","large_stash","large_ready"]:
+            assert getattr(p, k) >= 0, f"{k} went negative for player {ip} after action {action}"
 
 
 def distribute_light(state: State) -> None:
