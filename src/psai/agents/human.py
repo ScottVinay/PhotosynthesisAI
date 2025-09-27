@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 from pprint import pprint
 import json
 from psai.game.translations import encode_human_to_int_action, decode_vector_to_human_board
@@ -12,12 +13,23 @@ class HumanAgent(BaseAgent):
     into an integer action index that the environment can understand.
     """
 
-    def get_action(self, observation : np.ndarray, action_space_size : int) -> int:
+    def get_action(
+            self,
+            observation : np.ndarray,
+            action_space_size : int,
+            valid_actions_ohe: Optional[np.ndarray] = None
+        ) -> int:
         """
         Gets an action index based on the current observation.
         """
         pprint(decode_vector_to_human_board(observation))
-        action_dict_str = input("Enter your action:\n")
-        action_dict = json.loads(action_dict_str)
-        action_int = encode_human_to_int_action(action_dict)
+        while True:
+            action_dict_str = input("Enter your action number:\n")
+            action_dict = json.loads(action_dict_str)
+            #TODO dict to Action
+            action_int = encode_human_to_int_action(action_dict)
+            if valid_actions_ohe is not None and valid_actions_ohe[action_int] == 0:
+                print("Invalid action, please try again.")
+                continue
+            break
         return action_int

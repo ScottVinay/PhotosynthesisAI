@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 
 class BaseAgent:
     """
@@ -14,7 +15,12 @@ class BaseAgent:
         """
         return observation
 
-    def get_action(self, observation : np.ndarray, action_space_size : int) -> int:
+    def get_action(
+            self,
+            observation : np.ndarray,
+            action_space_size : int,
+            valid_actions_ohe: Optional[np.ndarray] = None
+        ) -> int:
         """
         Gets an action index based on the current observation.
         """
