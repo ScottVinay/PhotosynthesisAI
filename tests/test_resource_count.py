@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Test script to verify that the new n_score_cards_taken attribute works correctly
 """
@@ -8,6 +9,9 @@ from psai.game.objects import State, Cell, PlayerStats
 from psai.game.translations import encode_human_to_vector_board, decode_vector_to_human_board
 import numpy as np
 
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
+
 def create_minimal_state(n_score_cards_taken: int):
     """Create a minimal state for testing"""
     # Create minimal board state with just one cell
@@ -17,7 +21,7 @@ def create_minimal_state(n_score_cards_taken: int):
     for ring in range(4):
         if ring == 0:
             max_theta = 18
-            start_cell = 1 if ring == 0 else 0 
+            start_cell = 1 if ring == 0 else 0  # Skip (0,0) since it's already added
         elif ring == 1:
             max_theta = 12
             start_cell = 0
