@@ -1,58 +1,29 @@
 import gymnasium as gym
 import numpy as np
-from typing import Iterable, Optional
+from typing import Iterable, Optional, cast
 from dataclasses import dataclass
 from psai.agents.base import BaseAgent
-from psai.game.translations import decode_int_to_human_action, encode_human_to_vector_board
+from psai.game.translations import decode_int_to_human_action, encode_human_to_vector_board, encode_human_to_int_action
 from psai.game.assertions import assertion_loc
 from psai.game.objects import Action, TSIZES, VALID_CELLS, State, Cell, PlayerStats
 from psai.game.update import update_state
 from psai.game.endgame import check_has_game_ended, calculate_reward
+from psai.game.actions import get_allowed_actions
 from psai.visuals.mpl_render import MplRenderer
-
-class MultiplayerEnvWrapper(gym.Env):
-    """
-    The step of PhotosynthesisEnv returns the next state. However,
-    if we are training just one model, then the next observation is 
-    found when we have looped through all players.
-    """
-    def __init__(self, env: gym.Env, *agents: BaseAgent):
-        self.env = env
-        self.agents = agents
-        self.num_players = len(agents)
-        self.current_player = 0
-        #TODO I think that agents[0] should be None if it is trained with SB3.
-
-    def reset(self, *, seed=None, options=None):
-        self.current_player = 0
-        return self.env.reset(seed=seed, options=options)
-
-    def step(self, action : int):
-        while True:
-            action_human = decode_int_to_human_action(action)
-            if action_human.action_type == 'end_turn':
-                self.current_player = (self.current_player + 1) % self.num_players
-
-            state, reward, done, truncated, info = self.env.step(action)
-
-            if self.current_player == 0:
-                # End of round, return to main agent
-                return state, reward, done, truncated, info
-            else:
-                # Get next agent's action and continue the loop
-                action = self.agents[self.current_player].get_action(
-                    state,
-                    self.env.action_space.n # type: ignore
-                )
+from pprint import pprint
 
 
 class PhotosynthesisEnv(gym.Env):
-    # TODO
     def __init__(self, render_mode: Optional[str] = None):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(1521+1)
         self.state_h: State
+
+        self.episodes_states: list[list[State]] = []
+        self.episodes_actions: list[list[Action]] = []
+        self.record_of_states: list[State] = []
+        self.record_of_actions: list[Action] = []
         
         if render_mode == 'matplotlib':
             self.renderer = MplRenderer()
@@ -87,6 +58,9 @@ class PhotosynthesisEnv(gym.Env):
                 self.state_h.get_cell_at_loc((i, p)).size = 'small'
         state_v = encode_human_to_vector_board(self.state_h)
         info = {}
+
+        self.record_of_states = [self.state_h]
+        self.record_of_actions = []
         return state_v, info
 
     def step(self, action: int):
@@ -102,12 +76,79 @@ class PhotosynthesisEnv(gym.Env):
         if is_ended:
             done = True
             reward_dict = calculate_reward(self.state_h)
+            
+            # Log the episodes
+            self.episodes_states.append(self.record_of_states)
+            self.episodes_actions.append(self.record_of_actions)
 
             reward = reward_dict[self.state_h.active_player] #TODO not right(?) just to get working
         
+        # action_mask = self.get_action_mask(self.state_h)
+        # info = {"action_mask": action_mask}
         info = {}
 
+        self.record_of_states.append(self.state_h)
+        self.record_of_actions.append(action_h)
         return self.state_v, reward, done, truncated, info
-
+    
+    def get_action_mask(self, self_object) -> np.ndarray:
+        # Stable Baselines3's ActionMasker wrapper expects this method to take a single argument: the environment instance.
+        # This means it takes two self arguments.
+        allowed_actions = get_allowed_actions(self_object.state_h)
+        action_mask = np.zeros(self_object.action_space.n, dtype=bool) # type: ignore
+        for act in allowed_actions:
+            act_int = encode_human_to_int_action(act)
+            action_mask[act_int] = True
+        return action_mask
+    
     def render(self, mode="human"):
         print("Rendering not implemented.")
+
+
+def build_multiplayer_env(
+        env_name: type,
+        agents: tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent],
+        render_mode: Optional[str] = None,
+    ) -> gym.Env:
+    
+    class MultiplayerEnvWrapper(env_name):
+        """
+        The step of PhotosynthesisEnv returns the next state. However,
+        if we are training just one model, then the next observation is 
+        found when we have looped through all players.
+        """
+        def __init__(
+                self,
+                agents: tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent],
+                render_mode: Optional[str] = None,
+        ):
+            self.agents = agents
+            self.num_players = len(agents)
+            super().__init__(render_mode=render_mode)
+
+        def step(self, action : int):
+            while True:
+                action_human = decode_int_to_human_action(action)
+                
+                state, reward, done, truncated, info = super().step(action)
+
+                if self.state_h.active_player == 0:
+                    # Player 0, give values to main agent
+                    return state, reward, done, truncated, info
+                
+                else:
+                    # Get next agent's action and continue the loop
+                    assert self.agents[self.state_h.active_player] is not None
+                    agent = cast(BaseAgent, self.agents[self.state_h.active_player])
+                    valid_actions_ohe = self.get_action_mask(self)
+                    action = agent.get_action(
+                        observation=state,
+                        action_space_size=self.action_space.n, # type: ignore
+                        valid_actions_ohe=valid_actions_ohe,
+                    )
+    
+    multiplayer_env = MultiplayerEnvWrapper(
+        agents=agents,
+        render_mode=render_mode
+    )
+    return multiplayer_env
