@@ -19,6 +19,7 @@ setuptools = "^80.9.0"
 matplotlib = "^3.10.3"
 torch = "2.2.2"
 stable-baselines3 = "2.4.1"
+sb3-contrib = "==2.4.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

@@ -1730,6 +1730,21 @@ files = [
 cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
+name = "sb3-contrib"
+version = "2.4.0"
+description = "Contrib package of Stable Baselines3, experimental code."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "sb3_contrib-2.4.0-py3-none-any.whl", hash = "sha256:725d90157028a94c69804f2e7332128518fb7cbab39e7e141d2d0355547a72ab"},
+    {file = "sb3_contrib-2.4.0.tar.gz", hash = "sha256:a3709d97ddd529c45e3d56a5ae7e61a380bb2e11bacb9a3e6951ac0c481350ca"},
+]
+
+[package.dependencies]
+stable-baselines3 = ">=2.4.0,<3.0"
+
+[[package]]
 name = "setuptools"
 version = "80.9.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -1987,4 +2002,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "74d8518fb94fa9f759f8e4e12e17c041f21eee0ae2cd412fb5f1eb3cd4160f49"
+content-hash = "db5730b8314588e72dcfaa8cb46e40a4730e1db15cb9ce04c5cdb22415632d6c"
