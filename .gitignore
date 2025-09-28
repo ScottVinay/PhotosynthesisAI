@@ -198,3 +198,4 @@ cython_debug/
 .vscode/
 
 logs/
+*.zip
