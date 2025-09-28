@@ -62,10 +62,11 @@ class PhotosynthesisEnv(gym.Env):
         used_initial_locs = set()
         for i in range(2):
             for p in range(4):
-                random_ind = np.random.choice(len(VALID_CELLS))
-                random_loc = VALID_CELLS[random_ind]
-                while random_loc in used_initial_locs:
-                    random_loc = np.random.choice(VALID_CELLS)
+                while True:
+                    random_ind = np.random.choice(len(VALID_CELLS))
+                    random_loc = VALID_CELLS[random_ind]
+                    if random_loc not in used_initial_locs:
+                        break
                 used_initial_locs.add(random_loc)
                 self.state_h.get_cell_at_loc(random_loc).owner = p
                 self.state_h.get_cell_at_loc(random_loc).size = 'small'
