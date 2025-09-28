@@ -1,3 +1,4 @@
+from random import random
 import gymnasium as gym
 import numpy as np
 from typing import Iterable, Optional, cast
@@ -9,8 +10,10 @@ from psai.game.objects import Action, TSIZES, VALID_CELLS, State, Cell, PlayerSt
 from psai.game.update import update_state
 from psai.game.endgame import check_has_game_ended, calculate_reward
 from psai.game.actions import get_allowed_actions
+from psai.game.update import distribute_light
 from psai.visuals.mpl_render import MplRenderer
 from pprint import pprint
+from copy import deepcopy
 
 
 class PhotosynthesisEnv(gym.Env):
@@ -21,9 +24,9 @@ class PhotosynthesisEnv(gym.Env):
         self.state_h: State
 
         self.episodes_states: list[list[State]] = []
-        self.episodes_actions: list[list[Action]] = []
+        self.episodes_actions: list[list[tuple[int, Action]]] = []
         self.record_of_states: list[State] = []
-        self.record_of_actions: list[Action] = []
+        self.record_of_actions: list[tuple[int, Action]] = []
         
         if render_mode == 'matplotlib':
             self.renderer = MplRenderer()
@@ -51,21 +54,38 @@ class PhotosynthesisEnv(gym.Env):
             day=0,
             n_score_cards_taken=0
         )
+
+        #--------------------------------------------
+        #--------------------------------------------
         #TODO For now, initial placements are "random". This should be another pre-round and new action type.
         #TODO Add random starting player
+        used_initial_locs = set()
         for i in range(2):
             for p in range(4):
-                self.state_h.get_cell_at_loc((i, p)).owner = p
-                self.state_h.get_cell_at_loc((i, p)).size = 'small'
+                random_ind = np.random.choice(len(VALID_CELLS))
+                random_loc = VALID_CELLS[random_ind]
+                while random_loc in used_initial_locs:
+                    random_loc = np.random.choice(VALID_CELLS)
+                used_initial_locs.add(random_loc)
+                self.state_h.get_cell_at_loc(random_loc).owner = p
+                self.state_h.get_cell_at_loc(random_loc).size = 'small'
+                self.state_h.player_stats[p].small_stash -= 1
         state_v = encode_human_to_vector_board(self.state_h)
         info = {}
+        distribute_light(self.state_h)
+        #--------------------------------------------
+        #--------------------------------------------
 
-        self.record_of_states = [self.state_h]
+        self.record_of_states = [deepcopy(self.state_h)]
         self.record_of_actions = []
         return state_v, info
 
     def step(self, action: int):
         action_h = decode_int_to_human_action(action)
+
+        # This is done before the update to capture the active player correctly
+        self.record_of_actions.append((self.state_h.active_player, deepcopy(action_h)))
+
         update_state(self.state_h, action_h)
         self.state_v = encode_human_to_vector_board(self.state_h)
         
@@ -82,14 +102,15 @@ class PhotosynthesisEnv(gym.Env):
             self.episodes_states.append(self.record_of_states)
             self.episodes_actions.append(self.record_of_actions)
 
-            reward = reward_dict[self.state_h.active_player] #TODO not right(?) just to get working
+            reward = reward_dict[0] #This gets the reward for player 0, the learning agent.
+            #TODO this might be changed if the learner can change seat?
         
         # action_mask = self.get_action_mask(self.state_h)
         # info = {"action_mask": action_mask}
         info = {}
 
-        self.record_of_states.append(self.state_h)
-        self.record_of_actions.append(action_h)
+        self.record_of_states.append(deepcopy(self.state_h))
+        
         return self.state_v, reward, done, truncated, info
     
     def get_action_mask(self, self_object) -> np.ndarray:
@@ -104,6 +125,17 @@ class PhotosynthesisEnv(gym.Env):
     
     def render(self, mode="human"):
         print("Rendering not implemented.")
+
+    def log_records(self):
+        folder = "/Users/scott/My Drive/Github/PhotosynthesisAI/logs"
+        with open(f"{folder}/states.txt", "w") as f:
+            for istate, state in enumerate(self.record_of_states):
+                f.write(f"--- State {istate} ---\n")
+                f.write(state.__repr__() + "\n\n")
+        with open(f"{folder}/actions.txt", "w") as f:
+            for iact, (ip, action) in enumerate(self.record_of_actions):
+                f.write(f"--- Action {iact} by player {ip} ---\n")
+                f.write(action.__repr__() + "\n\n")
 
 
 def build_multiplayer_env(
@@ -127,6 +159,9 @@ def build_multiplayer_env(
             self.num_players = len(agents)
             super().__init__(render_mode=render_mode)
 
+        def active_player(self) -> int:
+            return self.state_h.active_player
+
         def step(self, action : int):
             while True:
                 action_human = decode_int_to_human_action(action)
@@ -147,7 +182,14 @@ def build_multiplayer_env(
                         action_space_size=self.action_space.n, # type: ignore
                         valid_actions_ohe=valid_actions_ohe,
                     )
-    
+                    # Debug prints
+                    # print(f'--- Opponent {self.state_h.active_player} turn ---')
+                    # print(f"Player chose action ({action}) {decode_int_to_human_action(action)}")
+                    # print('Valid actions:')
+                    # for i, valid in enumerate(valid_actions_ohe):
+                    #     if valid:
+                    #         print(f"  {i}: {decode_int_to_human_action(i)}")
+
     multiplayer_env = MultiplayerEnvWrapper(
         agents=agents,
         render_mode=render_mode
