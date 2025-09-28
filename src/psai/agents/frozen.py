@@ -26,22 +26,28 @@ class FrozenSB3(BaseAgent):
             action_space_size : int,
             valid_actions_ohe: Optional[np.ndarray] = None
         ) -> int:
-        """
-        Gets an action index based on the current observation.
-        """
-        import torch
+        # Ensure batch dimension and correct device/dtype
+        # obs_to_tensor handles np -> torch and adds batch dim
+        with torch.no_grad():
+            obs_tensor, _ = self.model.policy.obs_to_tensor(observation)  # shape [1, obs_dim], on correct device
 
-        obs_tensor = torch.as_tensor(observation).float()
-        distribution = self.model.policy.get_distribution(obs_tensor)
-        probs = distribution.distribution.probs.detach().cpu().numpy() # type: ignore #TODO Is probs right?
+            # Prepare mask for MaskablePPO: bool tensor shape [batch, n_actions]
+            action_masks = None
+            if valid_actions_ohe is not None:
+                mask = torch.as_tensor(valid_actions_ohe.astype(bool))
+                if mask.ndim == 1:
+                    mask = mask.unsqueeze(0)  # -> [1, n_actions]
+                action_masks = mask
+            else:
+                action_masks = torch.ones((1, action_space_size), dtype=torch.bool)
 
-        if valid_actions_ohe is not None:
-            masked_probs = probs * valid_actions_ohe
-            if masked_probs.sum() == 0:
-                masked_probs = valid_actions_ohe
-            masked_probs = masked_probs / masked_probs.sum()
-            action = np.random.choice(len(probs), p=masked_probs)
-        else:
+            # Get masked categorical distribution
+            dist = self.model.policy.get_distribution(obs_tensor, action_masks=action_masks) # type: ignore
+
+            # Probabilities for the single batch item
+            probs = dist.distribution.probs.squeeze(0).cpu().numpy()  # type: ignore
+
+            # Sample according to probs (already masked & renormalized if mask was given)
             action = np.random.choice(len(probs), p=probs)
 
         return int(action)

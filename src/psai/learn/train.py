@@ -2,7 +2,7 @@ print('import logging')
 import logging; from pprint import pprint
 print('from psai.game.env import PhotosynthesisEnv, MultiplayerEnvWrapper')
 from psai.game.env import PhotosynthesisEnv, build_multiplayer_env
-from psai.agents import RandomAgent
+from psai.agents import RandomAgent, FrozenSB3  
 print('from stable_baselines3 import PPO')
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.wrappers import ActionMasker
@@ -26,7 +26,10 @@ multiplayer_env = build_multiplayer_env(
         None,
         RandomAgent(),
         RandomAgent(),
-        RandomAgent()
+        RandomAgent(),
+        # FrozenSB3('/Users/scott/My Drive/Github/PhotosynthesisAI/model_files/1'),
+        # FrozenSB3('/Users/scott/My Drive/Github/PhotosynthesisAI/model_files/1'),
+        # FrozenSB3('/Users/scott/My Drive/Github/PhotosynthesisAI/model_files/1'),
     ),
     render_mode='matplotlib',
 )
@@ -36,31 +39,21 @@ monitored_env = Monitor(masked_env, filename = logfolder + "monitor.csv")
 # 2. Initialize PPO agent
 logger.info("Initializing PPO agent...")
 model = MaskablePPO("MlpPolicy", monitored_env, verbose=1)
+# model = MaskablePPO.load('/Users/scott/My Drive/Github/PhotosynthesisAI/model_files/1', env=monitored_env)
 
 # 3. Train the agent
-logger.info("Starting training for 30000 timesteps...")
-model.learn(total_timesteps=30000)
+logger.info("Starting training...")
+model.learn(total_timesteps=100_000)
 logger.info("Training complete.")
 
 from stable_baselines3.common.monitor import load_results
 results = load_results(logfolder)   # 1 row per finished episode
 
-episode_wins = (results['r']>0).astype(int).values
 episode_rewards = (results['r']).astype(int).values
 
-rolling_mean_wins = np.convolve(
-    cast(np.ndarray, episode_wins),
-    np.ones(10)/10, mode='valid'
-)
-rolling_mean_rewards = np.convolve(
-    cast(np.ndarray, episode_rewards),
-    np.ones(10)/10, mode='valid'
-)
-
-print('Rolling mean of wins:')
-pprint(rolling_mean_wins)
-
-print('Rolling mean of rewards:')
-pprint(rolling_mean_rewards)
+with open(logfolder + "episode_rewards.log", "w") as f:
+    for reward in episode_rewards:
+        f.write(f"{reward}, ")
+logger.info(f"Episode rewards saved to {logfolder}episode_rewards.log")
 
 print('done')
