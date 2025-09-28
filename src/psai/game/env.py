@@ -51,7 +51,8 @@ class PhotosynthesisEnv(gym.Env):
             day=0,
             n_score_cards_taken=0
         )
-        #TODO For now, initial placements are random. This should be another pre-round and new action type.
+        #TODO For now, initial placements are "random". This should be another pre-round and new action type.
+        #TODO Add random starting player
         for i in range(2):
             for p in range(4):
                 self.state_h.get_cell_at_loc((i, p)).owner = p
@@ -129,7 +130,7 @@ def build_multiplayer_env(
         def step(self, action : int):
             while True:
                 action_human = decode_int_to_human_action(action)
-                
+
                 state, reward, done, truncated, info = super().step(action)
 
                 if self.state_h.active_player == 0:

@@ -9,7 +9,10 @@ import torch
 
 class FrozenSB3(BaseAgent):
     """
+    An agent that uses a pre-trained Stable Baselines 3 model to select actions.
+    This is not trained and not passed to SB3's "learn" function.
     """
+
     def __init__(self, model_path: str) -> None:
         self.load_model(model_path)
         super().__init__()

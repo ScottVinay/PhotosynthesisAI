@@ -26,7 +26,7 @@ multiplayer_env = build_multiplayer_env(
     render_mode='matplotlib',
 )
 
-#TODO why env masker?
+#TODO Document: why env masker?
 masked_env = ActionMasker(multiplayer_env, "get_action_mask") # The string is the method name in the env that returns the mask
 
 # 2. Initialize PPO agent
