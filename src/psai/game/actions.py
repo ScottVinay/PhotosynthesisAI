@@ -10,12 +10,10 @@ The general kinds of action in the game are:
     - End turn.
 
 The human-readable actions are described as
-    {
-        'action_type' : str,
-        'size' : Optional[str], # 'seed', 'small', 'medium', 'large'
-        'origin_loc' : Optional[tuple[int, int]], # (ring, theta) 
-        'target_loc' : Optional[tuple[int, int]], # (ring, theta)
-    )
+    action_type: str
+    size: Optional[str]
+    origin_loc: Optional[tuple[int, int]]
+    target_loc: Optional[tuple[int, int]]
 
 The entry `origin_loc` is used for the tree that originates a seed only.
 The entry `size` is used for the purchase option only.
@@ -54,7 +52,7 @@ def get_allowed_actions(state : State) -> list[Action]:
             )
             allowed_actions.append(act)
 
-    #TODO Plant initial - outer ring, no origin
+    #TODO Plant initial - outer ring, no origin. Include distribute_light(state)
 
     # --------- #
     #   Plant   #
@@ -98,7 +96,7 @@ def get_allowed_actions(state : State) -> list[Action]:
             if cell.size == 'seed' and player_stats.small_ready > 0 and light >= 1:
                 act = Action(
                     action_type='upgrade_tree',
-                    size='small',
+                    size='seed',
                     origin_loc=None,
                     target_loc=cell.loc,
                 )
@@ -107,7 +105,7 @@ def get_allowed_actions(state : State) -> list[Action]:
             elif cell.size == 'small' and player_stats.medium_ready > 0 and light >= 2:
                 act = Action(
                     action_type='upgrade_tree', 
-                    size='medium',
+                    size='small',
                     origin_loc=None,
                     target_loc=cell.loc,
                 )
@@ -116,7 +114,7 @@ def get_allowed_actions(state : State) -> list[Action]:
             elif cell.size == 'medium' and player_stats.large_ready > 0 and light >= 3:
                 act = Action(
                     action_type='upgrade_tree',
-                    size='large', 
+                    size='medium', 
                     origin_loc=None,
                     target_loc=cell.loc,
                 )
