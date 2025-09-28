@@ -63,8 +63,8 @@ class PhotosynthesisEnv(gym.Env):
         for i in range(2):
             for p in range(4):
                 while True:
-                    random_ind = np.random.choice(len(VALID_CELLS))
-                    random_loc = VALID_CELLS[random_ind]
+                    random_theta = np.random.choice(18)
+                    random_loc = (0, random_theta)
                     if random_loc not in used_initial_locs:
                         break
                 used_initial_locs.add(random_loc)
