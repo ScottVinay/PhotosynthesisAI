@@ -8,13 +8,6 @@ class BaseAgent:
     from both this class and the SB3 agent class.
     """
 
-    def transform_state_vector(self, observation: np.ndarray) -> np.ndarray:
-        """
-        Transforms the observation vector into a format suitable for the agent.
-        This method should be overridden by subclasses if specific transformations are needed.
-        """
-        return observation
-
     def get_action(
             self,
             observation : np.ndarray,
