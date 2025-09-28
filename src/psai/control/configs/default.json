@@ -1,4 +1,4 @@
 {
     "sun_stays_at_zero": false,
-    "reward_method": "score"
+    "reward_method": "winning_score"
 }

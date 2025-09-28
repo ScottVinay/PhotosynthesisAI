@@ -33,6 +33,12 @@ def calculate_reward(state: State) -> dict[int, float]:
         max_score = max(player_stats.score for player_stats in state.player_stats.values())
         for i, player_stats in state.player_stats.items():
             reward[i] = player_stats.score / max_score if max_score > 0 else 0.
+    
+    elif config.reward_method == "winning_score":
+        reward = {}
+        max_score = max(player_stats.score for player_stats in state.player_stats.values())
+        for i, player_stats in state.player_stats.items():
+            reward[i] = player_stats.score if player_stats.score == max_score else 0.
 
     elif config.reward_method == "winner":
         reward = {}

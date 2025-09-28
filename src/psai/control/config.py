@@ -10,7 +10,7 @@ class ControlConfig:
     reward_method: str
 
     def __post_init__(self):
-        if self.reward_method not in ["score", "normed", "winner"]:
+        if self.reward_method not in ["score", "normed", "winner", "winning_score"]:
             raise ValueError(f"Invalid reward_method: {self.reward_method}")
 
 # Singleton-ish instance cache
