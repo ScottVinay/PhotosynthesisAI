@@ -7,6 +7,7 @@ from psai.game.objects import State, Cell, Action, PlayerStats
 from psai.game.utils import loc_int_to_tuple, loc_tuple_to_int
 from psai.game.assertions import assertion_loc
 
+
 def encode_human_to_vector_board(
         state : State,
     ):
@@ -254,7 +255,7 @@ def encode_human_to_int_action(
         if action.target_loc is None or action.size is None:
             raise ValueError("Upgrade action must have target_loc and size specified")
         cell_idx = loc_tuple_to_int(action.target_loc)
-        size_map = {'small': 0, 'medium': 1, 'large': 2}
+        size_map = {'seed': 0, 'small': 1, 'medium': 2}
         size_idx = size_map[action.size]
         return 1373 + cell_idx * 3 + size_idx
     
@@ -322,7 +323,7 @@ def decode_int_to_human_action(
         adjusted_idx = action_int - 1373
         cell_idx = adjusted_idx // 3
         size_idx = adjusted_idx % 3
-        size_map = {0: 'small', 1: 'medium', 2: 'large'}
+        size_map = {0: 'seed', 1: 'small', 2: 'medium'}
         return Action(
             action_type='upgrade_tree',
             size=size_map[size_idx],
