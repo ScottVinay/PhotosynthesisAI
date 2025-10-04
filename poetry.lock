@@ -129,11 +129,11 @@ description = "Cross-platform colored terminal text."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 groups = ["main", "dev"]
-markers = "sys_platform == \"win32\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
+markers = {main = "sys_platform == \"win32\" or platform_system == \"Windows\"", dev = "sys_platform == \"win32\""}
 
 [[package]]
 name = "comm"
@@ -485,6 +485,40 @@ other = ["matplotlib (>=3.0)", "moviepy (>=1.0.0)", "opencv-python (>=3.0)"]
 testing = ["dill (>=0.3.7)", "pytest (==7.1.3)", "scipy (>=1.7.3)"]
 torch = ["torch (>=1.0.0)"]
 toy-text = ["pygame (>=2.1.3)", "pygame (>=2.1.3)"]
+
+[[package]]
+name = "imageio"
+version = "2.37.0"
+description = "Library for reading and writing a wide range of image, video, scientific, and volumetric data formats."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "imageio-2.37.0-py3-none-any.whl", hash = "sha256:11efa15b87bc7871b61590326b2d635439acc321cf7f8ce996f812543ce10eed"},
+    {file = "imageio-2.37.0.tar.gz", hash = "sha256:71b57b3669666272c818497aebba2b4c5f20d5b37c81720e5e1a56d59c492996"},
+]
+
+[package.dependencies]
+numpy = "*"
+pillow = ">=8.3.2"
+
+[package.extras]
+all-plugins = ["astropy", "av", "imageio-ffmpeg", "numpy (>2)", "pillow-heif", "psutil", "rawpy", "tifffile"]
+all-plugins-pypy = ["av", "imageio-ffmpeg", "pillow-heif", "psutil", "tifffile"]
+build = ["wheel"]
+dev = ["black", "flake8", "fsspec[github]", "pytest", "pytest-cov"]
+docs = ["numpydoc", "pydata-sphinx-theme", "sphinx (<6)"]
+ffmpeg = ["imageio-ffmpeg", "psutil"]
+fits = ["astropy"]
+full = ["astropy", "av", "black", "flake8", "fsspec[github]", "gdal", "imageio-ffmpeg", "itk", "numpy (>2)", "numpydoc", "pillow-heif", "psutil", "pydata-sphinx-theme", "pytest", "pytest-cov", "rawpy", "sphinx (<6)", "tifffile", "wheel"]
+gdal = ["gdal"]
+itk = ["itk"]
+linting = ["black", "flake8"]
+pillow-heif = ["pillow-heif"]
+pyav = ["av"]
+rawpy = ["numpy (>2)", "rawpy"]
+test = ["fsspec[github]", "pytest", "pytest-cov"]
+tifffile = ["tifffile"]
 
 [[package]]
 name = "iniconfig"
@@ -1515,6 +1549,21 @@ files = [
 tests = ["pytest"]
 
 [[package]]
+name = "pybind11"
+version = "3.0.1"
+description = "Seamless operability between C++11 and Python"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "pybind11-3.0.1-py3-none-any.whl", hash = "sha256:aa8f0aa6e0a94d3b64adfc38f560f33f15e589be2175e103c0a33c6bce55ee89"},
+    {file = "pybind11-3.0.1.tar.gz", hash = "sha256:9c0f40056a016da59bab516efb523089139fcc6f2ba7e4930854c61efb932051"},
+]
+
+[package.extras]
+global = ["pybind11-global (==3.0.1)"]
+
+[[package]]
 name = "pycparser"
 version = "2.22"
 description = "C parser in Python"
@@ -1778,6 +1827,53 @@ files = [
 ]
 
 [[package]]
+name = "skia-python"
+version = "138.0"
+description = "Skia python binding"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "skia_python-138.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a8bcf4f8d6ea08bdf718ed257f9a9c722f643223f9b93230fd4c15ac5c82029f"},
+    {file = "skia_python-138.0-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:1b7f24a5b306f57d75b8733658189dd61ce9114a84b5d119b3b1fb09cbc991cb"},
+    {file = "skia_python-138.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:2c4164013355bcf255651ac8a0ca519fd6095b6e58fa5e7a057919bec158411d"},
+    {file = "skia_python-138.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:63a7f9dc8d5fdda969f35d7f8f3a774029093468a9c06771ccce9ab967b275ca"},
+    {file = "skia_python-138.0-cp310-cp310-win_amd64.whl", hash = "sha256:740104424e9c94a70a767adcdbfa2bce131c93a82fa00a50432406dc04bac7e8"},
+    {file = "skia_python-138.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:6e369105b2811b6c32d7f15624202609deeb428164ee395c715df01221c847f5"},
+    {file = "skia_python-138.0-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:55a2ae437d1c6dc46d9bbc2e3e0b4b5642022dcebc0634591ae1c8acea52a413"},
+    {file = "skia_python-138.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:e67c9bcac953fbeb31b38474a4e566371e5719d4e27032686359cbe602819af8"},
+    {file = "skia_python-138.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:4e9fb097849604e290be28a6b4cc29cb0079b0233e599c2f6b2ec635e47169d2"},
+    {file = "skia_python-138.0-cp311-cp311-win_amd64.whl", hash = "sha256:df5a0dd52e1038423f2e1c03677cba5ea974d215adec10763dd855f4a6ca0cfc"},
+    {file = "skia_python-138.0-cp311-cp311-win_arm64.whl", hash = "sha256:054ca430003d52468974cf69d98719e61f188630709a3706a868efc16e817970"},
+    {file = "skia_python-138.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6b83d7b8101038ab0fcb920b1a91c872615e45b0ac19fe0c66b55d3ad0d61970"},
+    {file = "skia_python-138.0-cp312-cp312-macosx_11_0_x86_64.whl", hash = "sha256:f22060f513b2fc258b4269e631128ca68889107bc4aa65255119f3d9c1c32993"},
+    {file = "skia_python-138.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:02b0c2146d25f45224c2c156dd8b859e89265ee5894c3fa8f456c6c41b27122d"},
+    {file = "skia_python-138.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:fb9e980a61defcb6ca19d73c97ea23d1aea633a82e9d1dead6ed259c3856baaf"},
+    {file = "skia_python-138.0-cp312-cp312-win_amd64.whl", hash = "sha256:625bb95dc225ea2257f1d1f7b0aee203290b91d909c8f5feaa7cd428f13bce22"},
+    {file = "skia_python-138.0-cp312-cp312-win_arm64.whl", hash = "sha256:e495143edba2a7cdf59e83723f00c9a247e5baeda4981fc6587803ed46c5ed2a"},
+    {file = "skia_python-138.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:1433b5a0bd4ca1c1d050541f54c25d27d55a129894dbd827d4e440697090ff83"},
+    {file = "skia_python-138.0-cp313-cp313-macosx_11_0_x86_64.whl", hash = "sha256:3f053128aa6344fa991c2485f29f40bda77b5f46467a43e778a34ec8f5b3615a"},
+    {file = "skia_python-138.0-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:878212d9576d065a45fd143c57d412bc0496c6594ecfcd9cc2cd93b4fd943cb4"},
+    {file = "skia_python-138.0-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:a6b3e58756a9fa8af3714edc05aeafc7922090f5a276c4be11337f252921dbe8"},
+    {file = "skia_python-138.0-cp313-cp313-win_amd64.whl", hash = "sha256:f2d596d5807fafef6bc43440f4df28f71db189f9e2cfb8613224713916837e3c"},
+    {file = "skia_python-138.0-cp313-cp313-win_arm64.whl", hash = "sha256:20285bf4ee41da754b842c80076fc4a240cb3801f4a1cbbb50b26a5dca1ebc39"},
+    {file = "skia_python-138.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:ff8dcb98b19e85d565c1d0accf8919e4b8a35d2a121d2d6f1c21fea655c85884"},
+    {file = "skia_python-138.0-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:ff3e692214b27490e38caf6ed123d82d2ff762da4561473a5a34fab1cb5dcd14"},
+    {file = "skia_python-138.0-cp38-cp38-manylinux_2_28_aarch64.whl", hash = "sha256:db3388f4e6e8f63c9e2b6cb0add0c2e483cbed783558b10eb7d94540f75db9b6"},
+    {file = "skia_python-138.0-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:1dd9306b2025e296ad1d0e2c3038e3221ade1d48dfd0a20ce926f8116603b909"},
+    {file = "skia_python-138.0-cp38-cp38-win_amd64.whl", hash = "sha256:9ae5de84629dba4c751b334a8c43b04e9b7fe2a65df26992770648aa5e131b0c"},
+    {file = "skia_python-138.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:736e6618f246444bff2ff73b9efe8fd7159d9048c85ecdffb23290702a5c9099"},
+    {file = "skia_python-138.0-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:ab438dfe40d1be3da6fdd94890862781dc4e545a0bfa169a8e9dcc25f3bb0afd"},
+    {file = "skia_python-138.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:2f5d842930d1e385aa7911e0705d4751d8e4aa550389baf88d40673672f180b1"},
+    {file = "skia_python-138.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:d17ad82d6094f9c7bfc25b6525e1080bf3715abcc848be042c786b365f51a48c"},
+    {file = "skia_python-138.0-cp39-cp39-win_amd64.whl", hash = "sha256:0f6136827a269a4a5294d92919bc6fad008da7d7e74256666d81506f863a6ff9"},
+]
+
+[package.dependencies]
+numpy = "*"
+pybind11 = ">=2.6"
+
+[[package]]
 name = "stable-baselines3"
 version = "2.4.1"
 description = "Pytorch version of Stable Baselines, implementations of reinforcement learning algorithms."
@@ -1922,6 +2018,28 @@ files = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.67.1"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2"},
+    {file = "tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["nbval", "pytest (>=6)", "pytest-asyncio (>=0.24)", "pytest-cov", "pytest-timeout"]
+discord = ["requests"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "traitlets"
 version = "5.14.3"
 description = "Traitlets Python configuration system"
@@ -2002,4 +2120,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "db5730b8314588e72dcfaa8cb46e40a4730e1db15cb9ce04c5cdb22415632d6c"
+content-hash = "e505e92a1e098d1fe90b1335879bff5e1f9253598cfa7b98b221f9bc9e67419a"

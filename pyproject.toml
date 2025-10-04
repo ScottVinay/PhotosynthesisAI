@@ -20,6 +20,9 @@ matplotlib = "^3.10.3"
 torch = "2.2.2"
 stable-baselines3 = "2.4.1"
 sb3-contrib = "==2.4.0"
+imageio = "^2.35.1"
+skia-python = "^138.0"
+tqdm = "^4.67.1"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
