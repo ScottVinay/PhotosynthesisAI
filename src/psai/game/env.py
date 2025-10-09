@@ -1,4 +1,4 @@
-from random import random
+import random
 import gymnasium as gym
 import numpy as np
 from typing import Iterable, Optional, cast
@@ -11,6 +11,7 @@ from psai.game.update import update_state
 from psai.game.endgame import check_has_game_ended, calculate_reward
 from psai.game.actions import get_allowed_actions
 from psai.game.update import distribute_light
+from psai.game.utils import find_git_root
 from psai.visuals.mpl_render import MplRenderer
 from pprint import pprint
 from copy import deepcopy
@@ -128,7 +129,7 @@ class PhotosynthesisEnv(gym.Env):
         print("Rendering not implemented.")
 
     def log_records(self):
-        folder = "/Users/scott/My Drive/Github/PhotosynthesisAI/logs"
+        folder = find_git_root() / "logs/"
         with open(f"{folder}/states.txt", "w") as f:
             for istate, state in enumerate(self.record_of_states):
                 f.write(f"--- State {istate} ---\n")
@@ -163,19 +164,27 @@ def build_multiplayer_env(
         def active_player(self) -> int:
             return self.state_h.active_player
 
+        def reset(self, *, seed=None, options=None):
+            # Shuffle agents to put each in a random seat each game.
+            random_indexes = list(range(len(self.agents)))
+            random.shuffle(random_indexes)
+            agents_list = [self.agents[i] for i in random_indexes]
+            self.agents = tuple(agents_list)
+
+            return super().reset(seed=seed, options=options)
+
         def step(self, action : int):
             while True:
                 action_human = decode_int_to_human_action(action)
 
                 state, reward, done, truncated, info = super().step(action)
 
-                if self.state_h.active_player == 0:
-                    # Player 0, give values to main agent
+                if self.agents[self.state_h.active_player] is None:
+                    # Agent seat
                     return state, reward, done, truncated, info
                 
                 else:
                     # Get next agent's action and continue the loop
-                    assert self.agents[self.state_h.active_player] is not None
                     agent = cast(BaseAgent, self.agents[self.state_h.active_player])
                     valid_actions_ohe = self.get_action_mask(self)
                     action = agent.get_action(
