@@ -48,6 +48,7 @@ class FrozenSB3(BaseAgent):
             probs = dist.distribution.probs.squeeze(0).cpu().numpy()  # type: ignore
 
             # Sample according to probs (already masked & renormalized if mask was given)
-            action = np.random.choice(len(probs), p=probs)
+            # action = np.random.choice(len(probs), p=probs)
+            action = np.argmax(probs)  # Greedy action selection
 
         return int(action)
