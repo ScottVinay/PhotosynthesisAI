@@ -1,5 +1,5 @@
 from psai.game.objects import State
-from psai.control.config import load_config
+from psai.control.config import load_game_config
 
 
 def check_has_game_ended(state: State) -> bool:
@@ -22,7 +22,7 @@ def calculate_reward(state: State) -> dict[int, float]:
     dict[int, float]
         A dictionary mapping player IDs to their calculated rewards.
     """
-    config = load_config()
+    config = load_game_config()
     if config.reward_method == "score":
         reward = {}
         for i, player_stats in state.player_stats.items():
