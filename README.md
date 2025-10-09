@@ -1,22 +1,22 @@
 # PhotosynthesisAI
 An AI to play the board game Photosynthesis.
 
-# Setting up
-`brew install pipx`
-`pipx ensurepath`
-`pipx install poetry`
+## Quickstart guide
 
-(First time setting up) `poetry init`
+Go to `src/psai/control/training_configs/default.json` and edit the training parameters.
 
-Add a package with `poetry add numpy`
+Each round refers to a number of training timesteps run against fixed opponents. In the first round, the opponents are random agents that uniformly select from available actions. After that the agent is frozen at the end of a round and distributed to the other seats.
 
-If manually adding a package to toml or cloning the repo, `poetry install`
+Then, run the training with:
 
-Run with 
+```
+brew install pipx
+pipx ensurepath
+pipx install poetry
+cd PhotosynthesisAI
+poetry run python src/psai/learn.train.py
+```
 
-`cd PhotosynthesisAI`
-`poetry run python src/psai/file.py`
+This saves simple training logs in `logs/`. You can save detailed state logs with the `log_records()` method of the environment.
 
-To find the env in VSCode, go to the repo in terminal, run
-`poetry env info --path`
-Then from the palatte choose `Select Python Interpretter` and add that path.
+After running training, go to `notebooks/analysis.ipynb`. This automatically accesses the most recent logs subfolder and plots the reward curves. This also calls the visualiser to plot an animation of a game (currently this requires manually logging records with `log_records()`).
