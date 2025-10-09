@@ -2,6 +2,8 @@ import numpy as np
 from typing import Optional
 from psai.game.assertions import assertion_loc
 from psai.game.objects import State, Cell, PlayerStats
+from pathlib import Path
+
 
 def rotate_loc(
     ring: int,
@@ -231,3 +233,14 @@ def get_score_from_n_score_cards_taken(
         0,  # 20
     ]
     return scores[n_score_cards_taken]
+
+
+def find_git_root(start: Optional[Path]=None) -> Path:
+    # Find a repo root (for dev fallback)
+    if start is None:
+        start = Path(__file__).resolve()
+    for p in (start, *start.parents):
+        if (p / ".git").exists() or (p / "pyproject.toml").exists():
+            return p
+    else:
+        raise FileNotFoundError("No git repo root found")
