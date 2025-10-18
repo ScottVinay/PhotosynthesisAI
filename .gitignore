@@ -199,5 +199,8 @@ cython_debug/
 
 logs/
 *.zip
-*.png
 *.gif
+*.png
+!*results/training_oct.png
+!*results/gameplay8.gif
+!*documentation/*.png
