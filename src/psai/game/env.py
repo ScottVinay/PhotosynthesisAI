@@ -142,9 +142,7 @@ class PhotosynthesisEnv(gym.Env):
 
 def build_multiplayer_env(
         env_name: type,
-        agents: tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent],
-        render_mode: Optional[str] = None,
-    ) -> gym.Env:
+    ) -> type:
     
     class MultiplayerEnvWrapper(env_name):
         """
@@ -152,6 +150,7 @@ def build_multiplayer_env(
         if we are training just one model, then the next observation is 
         found when we have looped through all players.
         """
+        #TODO Score depends on cell of harversted tree.
         def __init__(
                 self,
                 agents: tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent],
@@ -200,8 +199,4 @@ def build_multiplayer_env(
                     #     if valid:
                     #         print(f"  {i}: {decode_int_to_human_action(i)}")
 
-    multiplayer_env = MultiplayerEnvWrapper(
-        agents=agents,
-        render_mode=render_mode
-    )
-    return multiplayer_env
+    return MultiplayerEnvWrapper

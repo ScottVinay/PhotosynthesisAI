@@ -14,7 +14,6 @@ import os
 from datetime import datetime
 import importlib.resources as pkg_resources
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -58,11 +57,10 @@ def play_round(
             FrozenSB3(initial_model_path)
         )
 
-    multiplayer_env = build_multiplayer_env(
-        PhotosynthesisEnv,
+    Multiplayer_env_class = build_multiplayer_env(PhotosynthesisEnv)
+    multiplayer_env = Multiplayer_env_class(
         agents=agents,
         render_mode='matplotlib',
-
     )
     # The string is the method name in the env that returns the mask
     masked_env = ActionMasker(multiplayer_env, "get_action_mask")
