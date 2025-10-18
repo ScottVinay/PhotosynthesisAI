@@ -1,7 +1,5 @@
 # ——— Photosynthesis AI ———
 
-## Introduction
-
 This is my repo in which I work on reinforcement learning algorithms to play the board game Photosynthesis. The aim is to produce the first AI to achieve superhuman performance in the game.
 
 ## Quickstart guide
