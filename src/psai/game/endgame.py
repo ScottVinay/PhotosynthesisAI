@@ -3,6 +3,21 @@ from psai.control.config import load_game_config
 
 
 def check_has_game_ended(state: State) -> bool:
+    """
+    Check if the game has ended based on the current game state.
+    
+    The game ends when it reaches day 3 and hour 5.
+    
+    Parameters
+    ----------
+    state : State
+        The current game state.
+    
+    Returns
+    -------
+    bool
+        True if the game has ended, False otherwise.
+    """
     if state.day == 3 and state.hour == 5:
         return True
     return False

@@ -20,7 +20,24 @@ class HumanAgent(BaseAgent):
             valid_actions_ohe: Optional[np.ndarray] = None
         ) -> int:
         """
-        Gets an action index based on the current observation.
+        Get an action from human input via the console.
+        
+        Displays the current game state and prompts the user to enter
+        an action as a JSON string, then converts it to an action index.
+        
+        Parameters
+        ----------
+        observation : np.ndarray
+            The current observation vector.
+        action_space_size : int
+            The size of the action space.
+        valid_actions_ohe : Optional[np.ndarray], default=None
+            A one-hot encoded array indicating valid actions.
+        
+        Returns
+        -------
+        int
+            The action index selected by the human player.
         """
         pprint(decode_vector_to_human_board(observation))
         while True:

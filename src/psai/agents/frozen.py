@@ -18,6 +18,18 @@ class FrozenSB3(BaseAgent):
         super().__init__()
 
     def load_model(self, model_path: str) -> None:
+        """
+        Load a pre-trained MaskablePPO model from disk.
+        
+        Parameters
+        ----------
+        model_path : str
+            The path to the saved model file.
+        
+        Returns
+        -------
+        None
+        """
         self.model = MaskablePPO.load(model_path)
 
     def get_action(
@@ -26,6 +38,23 @@ class FrozenSB3(BaseAgent):
             action_space_size : int,
             valid_actions_ohe: Optional[np.ndarray] = None
         ) -> int:
+        """
+        Get an action from the pre-trained model using greedy selection.
+        
+        Parameters
+        ----------
+        observation : np.ndarray
+            The current observation vector.
+        action_space_size : int
+            The size of the action space.
+        valid_actions_ohe : Optional[np.ndarray], default=None
+            A one-hot encoded array indicating valid actions.
+        
+        Returns
+        -------
+        int
+            The selected action index.
+        """
         # Ensure batch dimension and correct device/dtype
         # obs_to_tensor handles np -> torch and adds batch dim
         with torch.no_grad():

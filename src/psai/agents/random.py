@@ -14,6 +14,21 @@ class RandomAgent(BaseAgent):
             valid_actions_ohe: Optional[np.ndarray] = None
         ) -> int:
         """
+        Select a random action from the valid action space.
+        
+        Parameters
+        ----------
+        observation : np.ndarray
+            The current observation vector (unused by random agent).
+        action_space_size : int
+            The size of the action space.
+        valid_actions_ohe : Optional[np.ndarray], default=None
+            A one-hot encoded array indicating valid actions.
+        
+        Returns
+        -------
+        int
+            A randomly selected valid action index.
         """
         # Generate a random action index within the action space
         if valid_actions_ohe is not None:

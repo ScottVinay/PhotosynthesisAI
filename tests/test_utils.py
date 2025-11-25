@@ -32,6 +32,18 @@ def test_get_shaded_cells():
 
 
 def test_rotate_board_six_times(sample_game_state: State):
+    """
+    Test that rotating the board 6 times returns it to the original state.
+    
+    Since the board has 6-fold rotational symmetry, rotating 6 times
+    (by 1/6 turn each) should return all cells to their original positions.
+    Also verifies that cell properties (owner, size, used) remain unchanged.
+    
+    Parameters
+    ----------
+    sample_game_state : State
+        A sample game state fixture for testing.
+    """
     state = sample_game_state
     original_board = [Cell(**cell.__dict__) for cell in state.board_state]
     for i in range(5):

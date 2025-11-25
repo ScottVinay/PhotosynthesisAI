@@ -3,6 +3,17 @@ from psai.game.objects import State, Cell, PlayerStats
 
 @pytest.fixture
 def sample_game_state():
+    """
+    Pytest fixture providing a sample game state for testing.
+    
+    Creates a predefined game state with a specific board configuration,
+    player stats, and game parameters for use in test cases.
+    
+    Returns
+    -------
+    State
+        A sample game state with predetermined values.
+    """
     board_state = [
         Cell(loc=(0,0), owner=0, size='small', used=True),
         Cell(loc=(0,1), owner=None, size=None, used=False),

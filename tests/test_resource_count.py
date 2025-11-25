@@ -13,7 +13,22 @@ import numpy as np
 
 
 def create_minimal_state(n_score_cards_taken: int):
-    """Create a minimal state for testing"""
+    """
+    Create a minimal state for testing.
+    
+    Creates a game state with an empty board and minimal player stats,
+    used for testing encoding/decoding functionality.
+    
+    Parameters
+    ----------
+    n_score_cards_taken : int
+        The number of score cards taken to set in the state.
+    
+    Returns
+    -------
+    State
+        A minimal game state for testing.
+    """
     # Create minimal board state with just one cell
     board_state = [Cell(loc=(0, 0), owner=None, size=None, used=False)]
     
@@ -54,7 +69,13 @@ def create_minimal_state(n_score_cards_taken: int):
     )
 
 def test_n_score_cards_taken_encoding():
-    """Test that n_score_cards_taken is correctly encoded and decoded"""
+    """
+    Test that n_score_cards_taken is correctly encoded and decoded.
+    
+    Verifies that the n_score_cards_taken attribute is properly preserved
+    through the encoding to vector and decoding back to state process.
+    Tests multiple values from 0 to 20.
+    """
     print("Testing n_score_cards_taken encoding/decoding...")
     
     # Test various n_score_cards_taken values
@@ -82,7 +103,12 @@ def test_n_score_cards_taken_encoding():
     print("All n_score_cards_taken tests passed!")
 
 def test_vector_size():
-    """Test that the vector has the expected size"""
+    """
+    Test that the vector has the expected size.
+    
+    Verifies that the encoded state vector has the expected length of 469,
+    which includes all board state, player stats, and game information.
+    """
     print("Testing vector size...")
     
     state = create_minimal_state(10)

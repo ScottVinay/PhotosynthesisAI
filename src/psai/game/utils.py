@@ -34,6 +34,21 @@ def rotate_board(
         state: State,
         rotation: int,
     ) -> None:
+    """
+    Rotate all cells on the board by a specified rotation amount.
+    
+    Parameters
+    ----------
+    state : State
+        The current game state containing the board to rotate.
+    rotation : int
+        The rotation amount in 1/6 turns, where positive is clockwise.
+    
+    Returns
+    -------
+    None
+        The state is modified in place.
+    """
     for cell in state.board_state:
         new_loc = rotate_loc(*cell.loc, rotation)
         setattr(cell, 'loc', new_loc)
@@ -236,6 +251,27 @@ def get_score_from_n_score_cards_taken(
 
 
 def find_git_root(start: Optional[Path]=None) -> Path:
+    """
+    Find the git repository root directory.
+    
+    Searches from the starting path upward through parent directories until
+    it finds a directory containing either a .git directory or pyproject.toml file.
+    
+    Parameters
+    ----------
+    start : Optional[Path], default=None
+        The starting path for the search. If None, starts from the current file's directory.
+    
+    Returns
+    -------
+    Path
+        The path to the git repository root.
+    
+    Raises
+    ------
+    FileNotFoundError
+        If no git repository root is found.
+    """
     # Find a repo root (for dev fallback)
     if start is None:
         start = Path(__file__).resolve()

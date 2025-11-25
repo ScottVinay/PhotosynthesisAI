@@ -18,6 +18,36 @@ from copy import deepcopy
 
 
 class PhotosynthesisEnv(gym.Env):
+    """
+    A Gymnasium environment for the Photosynthesis board game.
+    
+    This environment simulates the Photosynthesis game where players manage trees
+    on a hexagonal board, collecting light and scoring points.
+    
+    Attributes
+    ----------
+    observation_space : gym.spaces.Box
+        The observation space with shape (469,) representing the game state.
+    action_space : gym.spaces.Discrete
+        The action space with 1522 possible actions.
+    state_h : State
+        The current human-readable game state.
+    episodes_states : list[list[State]]
+        Record of all states from completed episodes.
+    episodes_actions : list[list[tuple[int, Action]]]
+        Record of all actions from completed episodes.
+    record_of_states : list[State]
+        States from the current episode.
+    record_of_actions : list[tuple[int, Action]]
+        Actions from the current episode.
+    renderer : MplRenderer, optional
+        Renderer for visualizing the game state.
+    
+    Parameters
+    ----------
+    render_mode : Optional[str], default=None
+        The rendering mode. If 'matplotlib', uses matplotlib renderer.
+    """
     def __init__(self, render_mode: Optional[str] = None):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=(469,), dtype=np.float32)
@@ -33,6 +63,21 @@ class PhotosynthesisEnv(gym.Env):
             self.renderer = MplRenderer()
 
     def reset(self, *, seed=None, options=None):
+        """
+        Reset the environment to its initial state.
+        
+        Parameters
+        ----------
+        seed : int, optional
+            Random seed for reproducibility.
+        options : dict, optional
+            Additional options for reset.
+        
+        Returns
+        -------
+        tuple[np.ndarray, dict]
+            The initial observation vector and an info dictionary.
+        """
         super().reset(seed=seed)
         initial_player_stats = {
             'light': 0,
@@ -83,6 +128,24 @@ class PhotosynthesisEnv(gym.Env):
         return state_v, info
 
     def step(self, action: int):
+        """
+        Execute one step in the environment.
+        
+        Parameters
+        ----------
+        action : int
+            The integer-encoded action to take.
+        
+        Returns
+        -------
+        tuple[np.ndarray, float, bool, bool, dict]
+            A tuple containing:
+            - observation: The new state vector
+            - reward: The reward for this step
+            - done: Whether the episode is finished
+            - truncated: Whether the episode was truncated
+            - info: Additional information dictionary
+        """
         action_h = decode_int_to_human_action(action)
 
         # This is done before the update to capture the active player correctly
@@ -116,6 +179,23 @@ class PhotosynthesisEnv(gym.Env):
         return self.state_v, reward, done, truncated, info
     
     def get_action_mask(self, self_object) -> np.ndarray:
+        """
+        Get a mask of valid actions for the current state.
+        
+        Note: Stable Baselines3's ActionMasker wrapper expects this method
+        to take a single argument (the environment instance), which means
+        it takes two self arguments.
+        
+        Parameters
+        ----------
+        self_object : PhotosynthesisEnv
+            The environment instance.
+        
+        Returns
+        -------
+        np.ndarray
+            A boolean array where True indicates valid actions.
+        """
         # Stable Baselines3's ActionMasker wrapper expects this method to take a single argument: the environment instance.
         # This means it takes two self arguments.
         allowed_actions = get_allowed_actions(self_object.state_h)
@@ -126,9 +206,30 @@ class PhotosynthesisEnv(gym.Env):
         return action_mask
     
     def render(self, mode="human"):
+        """
+        Render the environment.
+        
+        Parameters
+        ----------
+        mode : str, default="human"
+            The rendering mode.
+        
+        Returns
+        -------
+        None
+        """
         print("Rendering not implemented.")
 
     def log_records(self):
+        """
+        Log the recorded states and actions to text files.
+        
+        Writes the episode's state and action history to files in the logs directory.
+        
+        Returns
+        -------
+        None
+        """
         folder = find_git_root() / "logs/"
         with open(f"{folder}/states.txt", "w") as f:
             for istate, state in enumerate(self.record_of_states):
@@ -143,6 +244,22 @@ class PhotosynthesisEnv(gym.Env):
 def build_multiplayer_env(
         env_name: type,
     ) -> type:
+    """
+    Build a multiplayer environment wrapper.
+    
+    Creates a wrapper class that allows multiple agents to play against each other,
+    with only one agent being trained while others use pre-defined strategies.
+    
+    Parameters
+    ----------
+    env_name : type
+        The base environment class to wrap (typically PhotosynthesisEnv).
+    
+    Returns
+    -------
+    type
+        A wrapped environment class that supports multiplayer gameplay.
+    """
     
     class MultiplayerEnvWrapper(env_name):
         """
@@ -156,14 +273,47 @@ def build_multiplayer_env(
                 agents: tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent],
                 render_mode: Optional[str] = None,
         ):
+            """
+            Initialize the multiplayer environment wrapper.
+            
+            Parameters
+            ----------
+            agents : tuple[Optional[BaseAgent], BaseAgent, BaseAgent, BaseAgent]
+                A tuple of 4 agents. The first agent (None) represents the learning agent.
+            render_mode : Optional[str], default=None
+                The rendering mode.
+            """
             self.agents = agents
             self.num_players = len(agents)
             super().__init__(render_mode=render_mode)
 
         def active_player(self) -> int:
+            """
+            Get the index of the currently active player.
+            
+            Returns
+            -------
+            int
+                The active player's index (0-3).
+            """
             return self.state_h.active_player
 
         def reset(self, *, seed=None, options=None):
+            """
+            Reset the environment and shuffle agent positions.
+            
+            Parameters
+            ----------
+            seed : int, optional
+                Random seed for reproducibility.
+            options : dict, optional
+                Additional options for reset.
+            
+            Returns
+            -------
+            tuple[np.ndarray, dict]
+                The initial observation and info dictionary.
+            """
             # Shuffle agents to put each in a random seat each game.
             random_indexes = list(range(len(self.agents)))
             random.shuffle(random_indexes)
@@ -173,6 +323,22 @@ def build_multiplayer_env(
             return super().reset(seed=seed, options=options)
 
         def step(self, action : int):
+            """
+            Execute a step in the multiplayer environment.
+            
+            Continues executing actions for non-learning agents until control
+            returns to the learning agent.
+            
+            Parameters
+            ----------
+            action : int
+                The action to execute.
+            
+            Returns
+            -------
+            tuple[np.ndarray, float, bool, bool, dict]
+                The observation, reward, done flag, truncated flag, and info dict.
+            """
             while True:
                 action_human = decode_int_to_human_action(action)
 

@@ -102,6 +102,21 @@ class SkiaRenderer:
 		return r * scale
 
 	def polar_to_cartesian(self, ring: int, theta: int) -> Tuple[float, float]:
+		"""
+		Convert polar (ring, theta) coordinates to Cartesian (x, y) coordinates.
+		
+		Parameters
+		----------
+		ring : int
+			The ring index (0 is outermost, 3 is center).
+		theta : int
+			The angular position within the ring.
+		
+		Returns
+		-------
+		Tuple[float, float]
+			The (x, y) coordinates in world space.
+		"""
 		if ring == 3:  # center
 			return self.board_center
 
@@ -116,7 +131,23 @@ class SkiaRenderer:
 
 	# --------- Rendering ---------
 	def render_state(self, state: State, save_path: Optional[str] = None, return_image: bool = False):
-		"""Render the full state. Returns a skia.Image if return_image is True."""
+		"""
+		Render the full game state using Skia.
+		
+		Parameters
+		----------
+		state : State
+			The game state to render.
+		save_path : Optional[str], default=None
+			If provided, saves the rendered image to this file path.
+		return_image : bool, default=False
+			If True, returns the rendered skia.Image.
+		
+		Returns
+		-------
+		Optional[skia.Image]
+			The rendered image if return_image is True, otherwise None.
+		"""
 		surface = skia.Surface(self.width, self.height)
 		canvas = surface.getCanvas()
 		canvas.clear(self._hex_to_color4f(self.colors["background"]))
@@ -202,6 +233,20 @@ class SkiaRenderer:
 		)
 
 	def _draw_cell(self, canvas: 'skia.Canvas', cell: Cell) -> None:
+		"""
+		Draw a single cell on the canvas.
+		
+		Parameters
+		----------
+		canvas : skia.Canvas
+			The canvas to draw on.
+		cell : Cell
+			The cell object to render.
+		
+		Returns
+		-------
+		None
+		"""
 		xw, yw = self.polar_to_cartesian(*cell.loc)
 		px, py = self._world_to_board_pixels(xw, yw)
 		pr = self._world_radius_to_px(self.cell_radius)
@@ -225,6 +270,20 @@ class SkiaRenderer:
 				canvas.drawRect(rect, self._paint(self.colors['used_colour']))
 
 	def _draw_sun(self, canvas: 'skia.Canvas', sun_pos: int) -> None:
+		"""
+		Draw the sun position indicator on the canvas.
+		
+		Parameters
+		----------
+		canvas : skia.Canvas
+			The canvas to draw on.
+		sun_pos : int
+			The sun position (0-5) indicating which direction the sun is shining from.
+		
+		Returns
+		-------
+		None
+		"""
 		sun_radius_world = 3.5
 		angle = (sun_pos / 6.0) * 2.0 * math.pi - math.pi / 2.0
 
@@ -252,6 +311,22 @@ class SkiaRenderer:
 			canvas.drawLine(sx, sy, ex, ey, self._paint(self.colors['sun'], style=skia.Paint.kStroke_Style, stroke_width=2))
 
 	def _draw_info_panel(self, canvas: 'skia.Canvas', panel_rect: 'skia.Rect', state: State) -> None:
+		"""
+		Draw the information panel showing game state and player statistics.
+		
+		Parameters
+		----------
+		canvas : skia.Canvas
+			The canvas to draw on.
+		panel_rect : skia.Rect
+			The rectangle defining the info panel area.
+		state : State
+			The game state containing player information.
+		
+		Returns
+		-------
+		None
+		"""
 		# Panel background (subtle)
 		canvas.drawRect(panel_rect, self._paint('#ffffff'))
 		canvas.drawRect(panel_rect, self._paint('#00000020', style=skia.Paint.kStroke_Style, stroke_width=1))
@@ -297,6 +372,17 @@ class SkiaRenderer:
 
 # --------- Simple demo runner ---------
 def _sample_game_state() -> State:
+	"""
+	Generate a random sample game state for testing visualization.
+	
+	Creates a game state with randomly assigned cell owners, tree sizes,
+	and player statistics for demonstration purposes.
+	
+	Returns
+	-------
+	State
+		A randomly generated game state.
+	"""
 	import random
 	owners = [None, 0, 1, 2, 3]
 	sizes = [None, 'seed', 'small', 'medium', 'large']

@@ -37,6 +37,29 @@ def play_round(
         logs_folder: str = '',
         timesteps: int = 1000,
     ) -> None:
+    """
+    Execute a single training round for the RL agent.
+    
+    Creates a multiplayer environment with the learning agent playing against
+    either random agents (if no initial model) or frozen copies of the previous
+    model. Trains using MaskablePPO and saves the resulting model.
+    
+    Parameters
+    ----------
+    initial_model_path : Optional[str], default=None
+        Path to a pre-trained model to continue training from.
+        If None, starts with a fresh model against random agents.
+    training_idx : int, default=0
+        The index of this training round, used for logging and model naming.
+    logs_folder : str, default=''
+        The base folder path where logs should be saved.
+    timesteps : int, default=1000
+        The number of timesteps to train for in this round.
+    
+    Returns
+    -------
+    None
+    """
     logs_subfolder = os.path.join(logs_folder, f"round_{training_idx}/")
 
     # 1. Create environment
@@ -83,6 +106,23 @@ def play_round(
 
 
 def play_many_rounds(num_rounds: int = 10, timesteps: int = 1000) -> None:
+    """
+    Execute multiple sequential training rounds.
+    
+    Each round trains a model that plays against copies of the previous round's
+    model (self-play), allowing the agent to progressively improve.
+    
+    Parameters
+    ----------
+    num_rounds : int, default=10
+        The total number of training rounds to execute.
+    timesteps : int, default=1000
+        The number of timesteps to train for in each round.
+    
+    Returns
+    -------
+    None
+    """
     for i in range(num_rounds):
         logger.info(f"Starting round {i+1} of {num_rounds}...")
         play_round(

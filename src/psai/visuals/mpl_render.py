@@ -6,6 +6,30 @@ from psai.game.objects import State, Action, Cell, PlayerStats
 import random
 
 class MplRenderer:
+    """
+    A matplotlib-based renderer for visualizing the Photosynthesis game state.
+    
+    This renderer creates a two-panel visualization with the game board on the left
+    and an info panel on the right showing player statistics and game information.
+    
+    Attributes
+    ----------
+    figsize : tuple[int, int]
+        The figure size in inches (width, height).
+    colors : dict[str, str]
+        Color mappings for various game elements.
+    board_center : tuple[int, int]
+        The center coordinates of the board.
+    ring_radii : list[int]
+        Normalized radii for each ring (outer to center).
+    cell_radius : float
+        The radius of each cell on the board.
+    
+    Parameters
+    ----------
+    figsize : tuple[int, int], default=(12, 8)
+        The size of the figure to create.
+    """
     def __init__(self, figsize=(12, 8)):
         self.figsize = figsize
         
@@ -41,7 +65,24 @@ class MplRenderer:
         return (x, y)
     
     def render_state(self, state: State, save_path: Optional[str] = None, show: bool = True):
-        """Render the complete game state."""
+        """
+        Render the complete game state.
+        
+        Creates a visualization with the game board and player information panel.
+        
+        Parameters
+        ----------
+        state : State
+            The game state to render.
+        save_path : Optional[str], default=None
+            If provided, saves the figure to this file path.
+        show : bool, default=True
+            If True, displays the figure. If False, closes it after rendering.
+        
+        Returns
+        -------
+        None
+        """
         fig, (ax_board, ax_info) = plt.subplots(1, 2, figsize=self.figsize, 
                                                gridspec_kw={'width_ratios': [2, 1]})
         
@@ -74,7 +115,20 @@ class MplRenderer:
             plt.close()
             
     def _draw_cell(self, ax, cell: Cell):
-        """Draw a single cell on the board."""
+        """
+        Draw a single cell on the board.
+        
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axes to draw on.
+        cell : Cell
+            The cell object to render.
+        
+        Returns
+        -------
+        None
+        """
         x, y = self.polar_to_cartesian(*cell.loc)
         
         # Draw empty cell background
@@ -110,7 +164,20 @@ class MplRenderer:
         #        ha='center', va='top', fontsize=8, alpha=0.7)
     
     def _draw_sun(self, ax, sun_pos: int):
-        """Draw the sun position indicator."""
+        """
+        Draw the sun position indicator on the board.
+        
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axes to draw on.
+        sun_pos : int
+            The sun position (0-5) indicating which direction the sun is shining from.
+        
+        Returns
+        -------
+        None
+        """
         sun_radius = 3.5
         angle = (sun_pos / 6) * 2 * np.pi - np.pi/2
         
@@ -135,7 +202,20 @@ class MplRenderer:
             
     
     def _draw_info_panel(self, ax, state: State):
-        """Draw the information panel."""
+        """
+        Draw the information panel showing game state and player statistics.
+        
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axes to draw on.
+        state : State
+            The game state containing player information.
+        
+        Returns
+        -------
+        None
+        """
         ax.axis('off')
         
         # Game info
@@ -182,6 +262,17 @@ class MplRenderer:
 
 
 def sample_game_state():
+    """
+    Generate a random sample game state for testing visualization.
+    
+    Creates a game state with randomly assigned cell owners, tree sizes,
+    and player statistics for demonstration purposes.
+    
+    Returns
+    -------
+    State
+        A randomly generated game state.
+    """
     # Possible values
     owners = [None, 0, 1, 2, 3]
     sizes = [None, 'seed', 'small', 'medium', 'large']
