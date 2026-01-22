@@ -1,12 +1,4 @@
-from setuptools import setup, find_packages
+# This file is no longer needed with modern pyproject.toml
+# The project now uses uv with PEP 621 metadata in pyproject.toml
+# You can safely delete this file or keep it for backwards compatibility
 
-setup(
-    name='photosynthesisai',
-    version='0.1',
-    package_dir={"": "src"},             # <--- THIS tells setuptools to look in src/
-    packages=find_packages(where="src"), # <--- THIS finds packages inside src/
-    install_requires=[
-        "numpy",
-        # ... add others as needed
-    ],
-)
